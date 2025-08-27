@@ -1,0 +1,198 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Leaflet CSS for map components */
+@import 'leaflet/dist/leaflet.css';
+
+/* Base styles for the charger finder component */
+@layer base {
+  .charger-finder {
+    @apply font-sans text-sm;
+  }
+
+  /* Reset Leaflet marker icons for proper display */
+  .leaflet-default-icon-path {
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iNDEiIHZpZXdCb3g9IjAgMCAyNSA0MSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyLjUgMEM1LjU5NiAwIDAgNS41OTYgMCAxMi41QzAgMTkuNDA0IDUuNTk2IDI1IDEyLjUgMjVDMTkuNDA0IDI1IDI1IDE5LjQwNCAyNSAxMi41QzI1IDUuNTk2IDE5LjQwNCAwIDEyLjUgMFoiIGZpbGw9IiMyNTYzZWIiLz4KPHBhdGggZD0iTTEyLjUgNkM4LjM2NCA2IDUgOS4zNjQgNSAxMy41QzUgMTcuNjM2IDguMzY0IDIxIDEyLjUgMjFDMTYuNjM2IDIxIDIwIDE3LjYzNiAyMCAxMy41QzIwIDkuMzY0IDE2LjYzNiA2IDEyLjUgNloiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=');
+  }
+}
+
+@layer components {
+  /* Charger Finder Container */
+  .charger-finder {
+    @apply relative w-full bg-cevs-bg text-cevs-fg border border-cevs-border rounded-cevs;
+  }
+
+  /* Header */
+  .charger-finder__header {
+    @apply flex items-center justify-between p-4 border-b border-cevs-border;
+  }
+
+  .charger-finder__title {
+    @apply text-lg font-semibold text-cevs-fg;
+  }
+
+  .charger-finder__close {
+    @apply p-1 rounded-full hover:bg-cevs-bg-secondary transition-colors;
+  }
+
+  /* View Toggle */
+  .charger-finder__view-toggle {
+    @apply flex rounded-lg border border-cevs-border overflow-hidden;
+  }
+
+  .charger-finder__view-toggle button {
+    @apply px-3 py-1.5 text-sm font-medium transition-colors;
+  }
+
+  .charger-finder__view-toggle button.active {
+    @apply bg-cevs-accent text-white;
+  }
+
+  .charger-finder__view-toggle button:not(.active) {
+    @apply bg-cevs-bg text-cevs-muted hover:bg-cevs-bg-secondary;
+  }
+
+  /* Search Bar */
+  .charger-finder__search {
+    @apply p-4 border-b border-cevs-border;
+  }
+
+  .charger-finder__search-input {
+    @apply w-full px-3 py-2 border border-cevs-border rounded-cevs focus:outline-none focus:ring-2 focus:ring-cevs-accent focus:border-transparent;
+  }
+
+  .charger-finder__search-button {
+    @apply px-4 py-2 bg-cevs-accent text-white rounded-cevs hover:bg-cevs-accent/90 transition-colors;
+  }
+
+  /* Filters */
+  .charger-finder__filters {
+    @apply p-4 border-b border-cevs-border space-y-4;
+  }
+
+  .charger-finder__filter-group {
+    @apply space-y-2;
+  }
+
+  .charger-finder__filter-label {
+    @apply text-sm font-medium text-cevs-fg;
+  }
+
+  .charger-finder__filter-select {
+    @apply w-full px-3 py-2 border border-cevs-border rounded-cevs focus:outline-none focus:ring-2 focus:ring-cevs-accent focus:border-transparent;
+  }
+
+  .charger-finder__filter-checkbox {
+    @apply flex items-center space-x-2;
+  }
+
+  .charger-finder__filter-checkbox input {
+    @apply rounded border-cevs-border text-cevs-accent focus:ring-cevs-accent;
+  }
+
+  /* Results */
+  .charger-finder__results {
+    @apply flex-1 min-h-0;
+  }
+
+  .charger-finder__results--split {
+    @apply grid grid-cols-1 lg:grid-cols-2 gap-4;
+  }
+
+  .charger-finder__results--map {
+    @apply h-full;
+  }
+
+  .charger-finder__results--list {
+    @apply h-full overflow-y-auto;
+  }
+
+  /* Map */
+  .charger-finder__map {
+    @apply h-full min-h-[400px] rounded-cevs overflow-hidden;
+  }
+
+  /* List */
+  .charger-finder__list {
+    @apply h-full overflow-y-auto space-y-2 p-4;
+  }
+
+  /* Station Card */
+  .charger-finder__station-card {
+    @apply p-4 border border-cevs-border rounded-cevs hover:border-cevs-accent transition-colors cursor-pointer;
+  }
+
+  .charger-finder__station-card.selected {
+    @apply border-cevs-accent bg-cevs-accent/5;
+  }
+
+  .charger-finder__station-name {
+    @apply text-base font-semibold text-cevs-fg mb-1;
+  }
+
+  .charger-finder__station-address {
+    @apply text-sm text-cevs-muted mb-2;
+  }
+
+  .charger-finder__station-details {
+    @apply flex items-center justify-between text-sm;
+  }
+
+  .charger-finder__station-distance {
+    @apply text-cevs-accent font-medium;
+  }
+
+  .charger-finder__station-connectors {
+    @apply flex flex-wrap gap-1;
+  }
+
+  .charger-finder__connector-tag {
+    @apply px-2 py-1 text-xs bg-cevs-bg-secondary text-cevs-muted rounded;
+  }
+
+  /* Loading */
+  .charger-finder__loading {
+    @apply flex items-center justify-center p-8 text-cevs-muted;
+  }
+
+  /* Error */
+  .charger-finder__error {
+    @apply p-4 text-red-600 bg-red-50 border border-red-200 rounded-cevs;
+  }
+
+  /* Empty State */
+  .charger-finder__empty {
+    @apply flex flex-col items-center justify-center p-8 text-cevs-muted;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .charger-finder__results--split {
+      @apply grid-cols-1;
+    }
+
+    .charger-finder__map {
+      @apply min-h-[300px];
+    }
+  }
+}
+
+@layer utilities {
+  /* Accessibility */
+  .sr-only {
+    @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+  }
+
+  /* Focus styles */
+  .focus-visible {
+    @apply outline-none ring-2 ring-cevs-accent ring-offset-2;
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .charger-finder * {
+      @apply transition-none;
+    }
+  }
+}

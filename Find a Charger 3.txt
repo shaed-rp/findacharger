@@ -1,0 +1,673 @@
+EV Charger Finder Package for CommercialEVs.com
+Package Structure
+ev-charger-finder/
+??? README.md
+??? package.json
+??? .gitignore
+??? .env.example
+??? dist/                     # Built files for distribution
+??? src/
+?   ??? index.js             # Main export file
+?   ??? components/
+?   ?   ??? ChargerFinder.js     # Main component
+?   ?   ??? SearchForm.js        # Location & filter inputs
+?   ?   ??? MapView.js           # Interactive map
+?   ?   ??? StationList.js       # List of stations
+?   ?   ??? StationCard.js       # Individual station display
+?   ?   ??? PopupWrapper.js      # Modal/popup container
+?   ??? hooks/
+?   ?   ??? useNRELAPI.js        # NREL API integration
+?   ?   ??? useGeolocation.js    # Geolocation handling
+?   ?   ??? useLocalStorage.js   # Save preferences
+?   ??? services/
+?   ?   ??? nrelService.js       # API calls
+?   ?   ??? geocodingService.js  # Address to coordinates
+?   ??? styles/
+?   ?   ??? charger-finder.css   # Main styles
+?   ?   ??? themes/
+?   ?       ??? commercial.css   # Match your site theme
+?   ?       ??? default.css      # Default theme
+?   ??? utils/
+?       ??? constants.js         # API keys, configs
+?       ??? helpers.js           # Utility functions
+1. Package.json
+{
+  "name": "@commercialevs/charger-finder",
+  "version": "1.0.0",
+  "description": "EV Charger Finder widget for commercial EV platforms",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "webpack --mode production",
+    "dev": "webpack --mode development --watch",
+    "test": "jest",
+    "prepublish": "npm run build"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "dependencies": {
+    "react-leaflet": "^4.2.1",
+    "leaflet": "^1.9.4",
+    "@headlessui/react": "^1.7.17",
+    "axios": "^1.6.2",
+    "clsx": "^2.0.0"
+  },
+  "devDependencies": {
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4",
+    "babel-loader": "^9.1.3",
+    "@babel/core": "^7.23.5",
+    "@babel/preset-env": "^7.23.5",
+    "@babel/preset-react": "^7.23.3",
+    "css-loader": "^6.8.1",
+    "style-loader": "^3.3.3",
+    "jest": "^29.7.0"
+  }
+}
+2. Main Component (src/components/ChargerFinder.js)
+import React, { useState, useEffect } from 'react';
+import SearchForm from './SearchForm';
+import MapView from './MapView';
+import StationList from './StationList';
+import PopupWrapper from './PopupWrapper';
+import { useNRELAPI } from '../hooks/useNRELAPI';
+import { useGeolocation } from '../hooks/useGeolocation';
+import '../styles/charger-finder.css';
+
+const ChargerFinder = ({ 
+  mode = 'standalone', // 'standalone' | 'popup' | 'embedded'
+  vehicleLocation = null, // For embedding in vehicle listings
+  vehicleType = null, // To pre-filter appropriate chargers
+  onClose = null, // For popup mode
+  theme = 'commercial', // Theme selection
+  apiKey = null, // Override API key if needed
+  defaultFilters = {
+    chargerTypes: ['DC_FAST', 'LEVEL2'],
+    networkPreferences: [],
+    maxDistance: 25 // miles
+  }
+}) => {
+  const [stations, setStations] = useState([]);
+  const [selectedStation, setSelectedStation] = useState(null);
+  const [filters, setFilters] = useState(defaultFilters);
+  const [viewMode, setViewMode] = useState('split'); // 'map' | 'list' | 'split'
+  
+  const { fetchStations, loading, error } = useNRELAPI(apiKey);
+  const { location, requestLocation } = useGeolocation();
+
+  // Initialize based on vehicle location if embedded
+  useEffect(() => {
+    if (vehicleLocation && mode === 'embedded') {
+      handleSearch(vehicleLocation);
+    }
+  }, [vehicleLocation]);
+
+  const handleSearch = async (searchLocation) => {
+    const results = await fetchStations({
+      location: searchLocation,
+      filters: {
+        ...filters,
+        // Add vehicle-specific filters if in embedded mode
+        ...(vehicleType && getVehicleChargerFilters(vehicleType))
+      }
+    });
+    setStations(results);
+  };
+
+  const getVehicleChargerFilters = (type) => {
+    // Map vehicle types to appropriate charger types
+    const mapping = {
+      'class8_truck': ['DC_FAST', 'LEVEL3'],
+      'delivery_van': ['DC_FAST', 'LEVEL2'],
+      'box_truck': ['DC_FAST', 'LEVEL2'],
+      'ebike': ['LEVEL1', 'LEVEL2']
+    };
+    return { chargerTypes: mapping[type] || ['DC_FAST', 'LEVEL2'] };
+  };
+
+  const content = (
+    <div className={`charger-finder charger-finder--${mode} theme--${theme}`}>
+      {/* Header with controls */}
+      <div className="charger-finder__header">
+        <h2>Find EV Charging Stations</h2>
+        {mode === 'popup' && (
+          <button onClick={onClose} className="charger-finder__close">×</button>
+        )}
+        <div className="charger-finder__view-toggle">
+          <button 
+            onClick={() => setViewMode('map')}
+            className={viewMode === 'map' ? 'active' : ''}
+          >
+            Map Only
+          </button>
+          <button 
+            onClick={() => setViewMode('list')}
+            className={viewMode === 'list' ? 'active' : ''}
+          >
+            List Only
+          </button>
+          <button 
+            onClick={() => setViewMode('split')}
+            className={viewMode === 'split' ? 'active' : ''}
+          >
+            Split View
+          </button>
+        </div>
+      </div>
+
+      {/* Search and filters */}
+      <SearchForm 
+        onSearch={handleSearch}
+        onUseMyLocation={() => handleSearch(location)}
+        filters={filters}
+        onFiltersChange={setFilters}
+        isCompact={mode === 'popup'}
+      />
+
+      {/* Results display */}
+      {loading && <div className="charger-finder__loading">Finding charging stations...</div>}
+      {error && <div className="charger-finder__error">{error}</div>}
+      
+      {stations.length > 0 && (
+        <div className={`charger-finder__results charger-finder__results--${viewMode}`}>
+          {(viewMode === 'map' || viewMode === 'split') && (
+            <div className="charger-finder__map">
+              <MapView 
+                stations={stations}
+                selectedStation={selectedStation}
+                onStationSelect={setSelectedStation}
+                center={location}
+              />
+            </div>
+          )}
+          {(viewMode === 'list' || viewMode === 'split') && (
+            <div className="charger-finder__list">
+              <StationList 
+                stations={stations}
+                selectedStation={selectedStation}
+                onStationSelect={setSelectedStation}
+                vehicleCompatible={vehicleType}
+              />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
+  // Wrap in popup if needed
+  if (mode === 'popup') {
+    return (
+      <PopupWrapper isOpen={true} onClose={onClose}>
+        {content}
+      </PopupWrapper>
+    );
+  }
+
+  return content;
+};
+
+export default ChargerFinder;
+3. NREL API Hook (src/hooks/useNRELAPI.js)
+import { useState } from 'react';
+import { nrelService } from '../services/nrelService';
+
+export const useNRELAPI = (apiKey) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchStations = async ({ location, filters }) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const params = {
+        latitude: location.lat,
+        longitude: location.lng,
+        radius: filters.maxDistance || 25,
+        fuel_type: 'ELEC',
+        ev_network: filters.networkPreferences?.join(','),
+        ev_charging_level: mapChargerTypes(filters.chargerTypes),
+        access: 'public',
+        status: 'E', // Available stations only
+        limit: 100
+      };
+
+      const response = await nrelService.getNearestStations(params, apiKey);
+      
+      // Enhance data with additional commercial-relevant info
+      const enhancedStations = response.fuel_stations.map(station => ({
+        ...station,
+        commercialFeatures: {
+          hasMultiplePorts: station.ev_dc_fast_num > 1 || station.ev_level2_evse_num > 4,
+          truckAccessible: checkTruckAccess(station),
+          overnight: station.access_days_time?.includes('24 hours'),
+          reservable: station.ev_network?.includes('ChargePoint') || 
+                     station.ev_network?.includes('EVgo')
+        }
+      }));
+
+      return enhancedStations;
+    } catch (err) {
+      setError(err.message);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const mapChargerTypes = (types) => {
+    const mapping = {
+      'DC_FAST': 'dc_fast',
+      'LEVEL2': '2',
+      'LEVEL1': '1',
+      'LEVEL3': 'dc_fast'
+    };
+    return types?.map(t => mapping[t]).join(',') || 'all';
+  };
+
+  const checkTruckAccess = (station) => {
+    // Check for indicators of truck accessibility
+    const indicators = [
+      station.access_detail_code?.includes('TRUCK'),
+      station.station_name?.toLowerCase().includes('truck'),
+      station.ev_dc_fast_num > 0, // DC fast more likely truck-ready
+      station.facility_type === 'TRUCK_STOP'
+    ];
+    return indicators.some(Boolean);
+  };
+
+  return { fetchStations, loading, error };
+};
+4. Integration Instructions
+A. For Popup Mode (on EV Listings)
+// In your EV listing component
+import { ChargerFinder } from '@commercialevs/charger-finder';
+
+const EVListing = ({ vehicle }) => {
+  const [showChargerFinder, setShowChargerFinder] = useState(false);
+  
+  return (
+    <div className="ev-listing">
+      {/* Your existing vehicle details */}
+      
+      <button 
+        onClick={() => setShowChargerFinder(true)}
+        className="btn btn-primary"
+      >
+        Find Nearby Chargers
+      </button>
+      
+      {showChargerFinder && (
+        <ChargerFinder 
+          mode="popup"
+          vehicleLocation={{
+            lat: vehicle.dealer_latitude,
+            lng: vehicle.dealer_longitude
+          }}
+          vehicleType={vehicle.category} // 'class8_truck', 'delivery_van', etc.
+          onClose={() => setShowChargerFinder(false)}
+          theme="commercial"
+        />
+      )}
+    </div>
+  );
+};
+B. For Standalone Section (Infrastructure Tab)
+// In your infrastructure page/component
+import { ChargerFinder } from '@commercialevs/charger-finder';
+
+const InfrastructurePage = () => {
+  return (
+    <div className="infrastructure-page">
+      <h1>Charging Infrastructure</h1>
+      
+      <ChargerFinder 
+        mode="standalone"
+        theme="commercial"
+        defaultFilters={{
+          chargerTypes: ['DC_FAST', 'LEVEL2'],
+          maxDistance: 50,
+          networkPreferences: ['ChargePoint', 'EVgo', 'Electrify America']
+        }}
+      />
+    </div>
+  );
+};
+C. For Embedded Mode (inline with content)
+// In any component where you want inline charger finding
+import { ChargerFinder } from '@commercialevs/charger-finder';
+
+const FleetPlanning = () => {
+  return (
+    <div className="fleet-planning">
+      <section>
+        <h2>Plan Your Route</h2>
+        <p>Find charging stations along your commercial routes.</p>
+        
+        <ChargerFinder 
+          mode="embedded"
+          theme="commercial"
+          defaultFilters={{
+            chargerTypes: ['DC_FAST'],
+            maxDistance: 10
+          }}
+        />
+      </section>
+    </div>
+  );
+};
+5. Build & Deployment
+Local Development:
+# Clone the repository
+git clone https://github.com/commercialevs/ev-charger-finder.git
+cd ev-charger-finder
+
+# Install dependencies
+npm install
+
+# Set up environment
+cp .env.example .env
+# Add your NREL API key to .env
+
+# Run development build
+npm run dev
+Building for Production:
+# Build the package
+npm run build
+
+# This creates optimized files in /dist
+Publishing as NPM Package:
+# If publishing to NPM
+npm login
+npm publish --access public
+
+# Or for private registry
+npm publish --registry https://your-registry.com
+Direct Integration (without NPM):
+# In your main project
+npm install --save file:../path-to-ev-charger-finder
+
+# Or using Git submodules
+git submodule add https://github.com/commercialevs/ev-charger-finder.git src/packages/charger-finder
+6. Configuration
+Environment Variables (.env):
+REACT_APP_NREL_API_KEY=your_api_key_here
+REACT_APP_GOOGLE_MAPS_API_KEY=optional_for_enhanced_features
+REACT_APP_DEFAULT_SEARCH_RADIUS=25
+REACT_APP_DEFAULT_CENTER_LAT=41.8781
+REACT_APP_DEFAULT_CENTER_LNG=-87.6298
+Webpack Configuration (webpack.config.js):
+const path = require('path');
+
+module.exports = {
+  entry: './src/index.js',
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'charger-finder.js',
+    library: '@commercialevs/charger-finder',
+    libraryTarget: 'umd',
+    globalObject: 'this'
+  },
+  module: {
+    rules: [
+      {
+        test: /\.jsx?$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env', '@babel/preset-react']
+          }
+        }
+      },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader']
+      }
+    ]
+  },
+  externals: {
+    react: 'react',
+    'react-dom': 'react-dom'
+  },
+  resolve: {
+    extensions: ['.js', '.jsx']
+  }
+};
+7. Styling (src/styles/charger-finder.css)
+.charger-finder {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  position: relative;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.charger-finder--popup {
+  max-width: 90vw;
+  max-height: 90vh;
+  width: 1200px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.charger-finder--standalone {
+  width: 100%;
+  height: 600px;
+}
+
+.charger-finder--embedded {
+  width: 100%;
+  min-height: 400px;
+}
+
+.charger-finder__header {
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.charger-finder__results {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.charger-finder__results--split {
+  display: grid;
+  grid-template-columns: 60% 40%;
+  gap: 0;
+}
+
+.charger-finder__results--map .charger-finder__map,
+.charger-finder__results--list .charger-finder__list {
+  width: 100%;
+}
+
+.charger-finder__map {
+  height: 100%;
+  min-height: 400px;
+}
+
+.charger-finder__list {
+  height: 100%;
+  overflow-y: auto;
+  padding: 20px;
+  background: #f8f9fa;
+}
+
+/* Theme: Commercial */
+.theme--commercial {
+  --primary-color: #2563eb;
+  --secondary-color: #10b981;
+  --danger-color: #ef4444;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+}
+
+.theme--commercial .charger-finder__header {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .charger-finder__results--split {
+    grid-template-columns: 1fr;
+  }
+  
+  .charger-finder--popup {
+    width: 100%;
+    height: 100%;
+    max-width: 100vw;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+}
+8. Additional Features to Implement
+Commercial-Specific Enhancements:
+1. Route Planning Integration
+o Multi-stop route optimization with charging stops
+o Fleet vehicle range calculation
+o Time-of-use pricing optimization
+2. Fleet Management Features
+o Bulk vehicle charging scheduling
+o Favorite stations for company fleet
+o Usage analytics and reporting
+3. Advanced Filters
+o Payment methods accepted
+o Membership/network requirements
+o Amenities (restrooms, food, parking)
+o Commercial vehicle accessibility
+o Reservation capability
+4. Data Export
+o CSV export of station lists
+o PDF reports for route planning
+o API for integration with fleet management systems
+9. Testing
+// Example test file (src/__tests__/ChargerFinder.test.js)
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import ChargerFinder from '../components/ChargerFinder';
+
+describe('ChargerFinder', () => {
+  test('renders search form', () => {
+    render(<ChargerFinder mode="standalone" />);
+    expect(screen.getByPlaceholderText(/enter location/i)).toBeInTheDocument();
+  });
+
+  test('handles popup mode correctly', () => {
+    const onClose = jest.fn();
+    render(<ChargerFinder mode="popup" onClose={onClose} />);
+    
+    fireEvent.click(screen.getByText('×'));
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  test('filters stations by vehicle type', async () => {
+    render(
+      <ChargerFinder 
+        mode="embedded" 
+        vehicleType="class8_truck"
+      />
+    );
+    
+    // Verify DC fast charging is prioritized for trucks
+    await waitFor(() => {
+      expect(screen.getByText(/DC Fast/i)).toBeInTheDocument();
+    });
+  });
+});
+10. README.md for GitHub
+# EV Charger Finder for CommercialEVs
+
+A modular, embeddable React component for finding EV charging stations, optimized for commercial vehicle platforms.
+
+## Features
+- ??? Interactive map with station markers
+- ?? Geolocation and address search
+- ?? Commercial vehicle filtering
+- ?? Responsive design
+- ?? NREL API integration
+- ?? Multiple display modes (popup, embedded, standalone)
+
+## Installation
+
+```bash
+npm install @commercialevs/charger-finder
+Quick Start
+import { ChargerFinder } from '@commercialevs/charger-finder';
+
+function App() {
+  return (
+    <ChargerFinder 
+      mode="standalone"
+      apiKey="YOUR_NREL_API_KEY"
+    />
+  );
+}
+API Documentation
+[Full documentation available here]
+License
+MIT
+
+This modular package structure allows you to:
+1. Maintain it as a separate GitHub repository
+2. Install it as an NPM package
+3. Use it in multiple modes (popup, embedded, standalone)
+4. Customize themes to match your site
+5. Scale features for commercial-specific needs
+
+The package is optimized for commercial EV use cases with truck accessibility checks, fleet features, and business-focused filtering options.
+
+
+Here are the key highlights:
+Key Features of This Solution:
+1. Flexible Display Modes
+* Popup Mode: Click a button on any EV listing to open a modal with the charger finder
+* Standalone Mode: Full-page display for your Infrastructure tab
+* Embedded Mode: Inline integration within any page content
+2. Commercial Vehicle Optimization
+* Automatically filters chargers based on vehicle type (truck vs van vs e-bike)
+* Identifies truck-accessible stations
+* Shows commercial-relevant features like: 
+o Multiple charging ports availability
+o 24-hour access for overnight charging
+o Reservation capabilities
+o Heavy vehicle accessibility
+3. Easy Integration
+The package can be added to your site in three ways:
+* As an NPM package: npm install @commercialevs/charger-finder
+* Via Git submodule for direct source access
+* By building and importing the bundled JavaScript file
+4. Smart Features for Your Use Cases
+For vehicle listings:
+<button onClick={() => setShowChargerFinder(true)}>
+  Find Nearby Chargers
+</button>
+This opens a popup centered on the dealer's location, pre-filtered for that vehicle type.
+For the Infrastructure section:
+<ChargerFinder mode="standalone" theme="commercial" />
+This provides a full-featured charging station finder with all filtering options.
+5. Professional Styling
+* Matches your site's commercial aesthetic
+* Responsive design works on all devices
+* Clean, modern interface with your brand colors
+6. Data Integration
+Uses the NREL (National Renewable Energy Laboratory) API to provide:
+* Real-time station availability
+* Comprehensive coverage across the US
+* Detailed station information including charging speeds, networks, and pricing
+Next Steps:
+1. Get NREL API Key: Sign up at developer.nrel.gov for free
+2. Create GitHub Repository: Set up the package structure I provided
+3. Customize Theme: Adjust colors and styling to match your brand
+4. Add to Your Site: Install and integrate using the examples provided
+The modular architecture ensures you can maintain this as a separate package while easily updating and deploying it across your site. Would you like help with any specific aspect of the implementation, such as setting up the GitHub repository or customizing the styling to better match your current site design?
+

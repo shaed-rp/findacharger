@@ -1,0 +1,357 @@
+React Alternative Fuel Station Locator
+Overview and Features
+We will build a React front-end application that helps users locate alternative fuel stations across the U.S. using the NREL Alternative Fuel Stations API. The application will provide a clean, responsive UI and include the following key features (fulfilling all requirements):
+* Location Search: Users can enter a location (address, city/state, or ZIP code) or use geolocation to find nearby alternative fuel stationsgithub.comgithub.com.
+* Fuel Type Filter: Users can filter stations by fuel type (Electric, CNG, Hydrogen, etc.), selecting one or multiple fuel categoriesdeveloper.nrel.gov.
+* Interactive Map View: Search results are displayed as markers on an interactive map that users can pan/zoom. Each marker represents a station.
+* List View of Stations: Search results are also shown in a list with station details like name, address, available fuel type(s), and operating hours.
+* Station Details: For each station, the app shows its name, full address, the fuel types it provides, and its operating hours (access times)developer.nrel.govdeveloper.nrel.gov.
+* Directions Link: Each station entry includes an option to get directions via an external mapping service (e.g. Google Maps), which opens the chosen mapping app or website with the station’s location pre-filledgithub.com.
+This front-end will use the NREL Alternative Fuel Stations API (v1) as the data sourcedeveloper.nrel.gov. We will include a placeholder for the API key in the code for easy configuration. The app’s design will be modular, separating concerns into reusable components, and will use responsive design techniques (CSS flexbox/grid or a UI framework) to ensure usability on different screen sizes.
+Design and Technology Choices
+React Framework: We use React (functional components with hooks) to build the UI. This allows us to manage state (like user location, filter selections, and fetched station data) and update the interface efficiently as the user interacts with the app. The project can be bootstrapped with Create React App or Vite for convenience, and we structure the code into logical components for maintainability.
+Geolocation & Location Input: For finding nearby stations, the user can either allow the app to detect their current location or input a location manually. If the user clicks "Use My Location", we leverage the HTML Geolocation API via navigator.geolocation.getCurrentPosition to get the device’s latitude and longitude (this requires a secure context (HTTPS) and user permission)developer.mozilla.org. If the user enters a location string (e.g. "Minneapolis, MN" or a street address), we use a geocoding service to convert that to coordinates. (For example, one could use the Google Geocoding API or an open service like Nominatim for OpenStreetMap data). In this design, we’ll assume using a free API like Nominatim to get coordinates from the input address for demonstration. Once we have latitude/longitude from either method, we can query the NREL API for nearby stations.
+NREL API for Station Data: We utilize NREL’s “Nearest Stations” endpoint to retrieve stations near a given latitude/longitudedeveloper.nrel.govdeveloper.nrel.gov. This endpoint returns the nearest alternative fuel stations within a radius of the specified location. We will request data in JSON format (e.g. /api/alt-fuel-stations/v1/nearest.json) using our API key. The query will include parameters for latitude, longitude, and the selected fuel type filter. For example, to fetch electric charging stations near a location, we include fuel_type=ELEC in the requestdeveloper.nrel.gov. The API supports multiple fuel types by comma-separating the codes (e.g. fuel_type=ELEC,CNG for Electric or CNG)developer.nrel.gov. If no specific fuel filter is given, the default is all fuel typesdeveloper.nrel.gov. We also can specify a search radius (default is 5 miles if not specified) and limit the number of results as needed, but for simplicity, we’ll use the default radius unless otherwise noted.
+The NREL API response will include an array of station objects with detailed information for each stationdeveloper.nrel.gov. Important fields we will use include: station_name (name of the station), latitude & longitude (for mapping), street_address, city, state, zip (for the address), fuel_type_code (fuel type provided, e.g. "ELEC" or "CNG"), and access_days_time (hours of operation)developer.nrel.govdeveloper.nrel.gov. For example, a station might have "station_name": "Shell Station", "fuel_type_code": "CNG", "street_address": "123 Main St", "city": "Denver", "state": "CO", "access_days_time": "24 hours daily" in the JSON data. We will display these details in the UI.
+Interactive Map: For the map, we will use React-Leaflet, a React library for the open-source Leaflet maps. This choice avoids requiring an additional API key (Leaflet can use free OpenStreetMap tiles) and provides interactivity (panning, zooming, clickable markers) out-of-the-box. We include the Leaflet CSS for proper display. The map component will center on the search location (user’s location or geocoded address) and add markers for each fuel station result. When a marker is clicked, we can show a small popup with the station name and fuel type. The map and list will be shown side by side on larger screens, and stacked vertically on smaller screens for responsiveness. We ensure the map container and list container have flexible CSS sizing so that they adjust in a responsive layout.
+List View and Station Details: Alongside the map, we present a scrollable list of station results. Each list item will show the station’s name, address, fuel type(s), and hours. We’ll convert the fuel type codes to human-friendly names (e.g. "ELEC" ? "Electric") for clarity. Each item also includes a “Directions” link or button. Clicking this will open an external mapping service (Google Maps in our example) in a new tab, with the destination set to the station’s location (latitude/longitude). For instance, we construct a URL like https://www.google.com/maps/dir/?api=1&destination=LAT,LON for the station. If the user’s current location is known, we could also include it as the origin in the directions URL for a more precise route. The combination of the map and list views gives users both a visual and textual way to identify suitable stations.
+Responsive Design: We apply a simple responsive design so that on a wide screen (desktop/tablet), the map and the list are shown side by side (two columns), whereas on a narrow screen (mobile), the map appears on top and the list below (one column stack). This can be achieved with CSS grid or flexbox. We also ensure the UI controls (input field, buttons, checkboxes) are easy to tap on mobile and the map resizes correctly when the window size changes. The design uses a clean style (we could optionally use a library like Bootstrap or Material-UI for aesthetics, but here we’ll just use basic CSS for simplicity).
+Implementation Details
+We will now outline the main components of the React application and provide the complete source code for each:
+* App Component (App.js): The root component that manages state and orchestrates the others. It holds state for the stations data, loading/error status, the selected fuel filter, and the current search location (coordinates and maybe address). It provides handler functions to fetch data from the NREL API and to handle user actions (search form submission or use of geolocation). On initial load, it might show a welcome or instructions until a search is made. After a search, it renders the Map and List with results.
+* SearchForm Component (SearchForm.js): Handles the input form where the user can type a location or click a button to use geolocation. It also includes the fuel type filter UI (e.g. a dropdown or checkboxes for each fuel type). When the form is submitted (or search button clicked), it calls a callback (passed from App) with the entered location and selected fuel types. The geolocation button, when clicked, will trigger a function (also from App or passed via props) to use navigator.geolocation to get coordinates and then fetch stations.
+* MapView Component (MapView.js): Contains the interactive map. It uses React-Leaflet’s MapContainer and TileLayer to render the map, centering on the provided coordinates. For each station in the results, it renders a Marker. Each marker can include a Popup showing the station’s name (and possibly fuel type or a snippet of info). This component receives the station list and map center as props from App.
+* StationList Component (StationList.js): Renders the list of station results. It takes the stations array as a prop. It maps through the stations to display each station’s details (name, address, fuel type, hours) in a structured way (could be a list group or cards). It also includes the "Get Directions" link for each station. This component focuses purely on presentation of station info in the list format.
+Additionally, we will have a utility function for geocoding (to convert an address query to coordinates using an external API). We can define this in a separate file or within App for simplicity. In our code, we’ll implement a function geocodeLocation(query) that fetches from the Nominatim API to get latitude and longitude for a given location string.
+Before running the app, don't forget to install the necessary packages (React, ReactDOM, and the map library): for example, npm install react react-dom react-leaflet leaflet. Also include the Leaflet CSS (import it in App or index). For the NREL API, sign up for an API key and replace the placeholder in the code with your keygithub.com. (We use YOUR_NREL_API_KEY as a placeholder in the code below.)
+Now, let's look at the complete source code for the React front end:
+App.js
+This is the main component that manages state and integrates all parts of the app. It handles fetching data from NREL and passing data to the Map and List components.
+// App.js
+import React, { useState } from "react";
+import SearchForm from "./SearchForm";
+import MapView from "./MapView";
+import StationList from "./StationList";
+// Import Leaflet CSS for map visuals
+import "leaflet/dist/leaflet.css";
+
+const NREL_API_KEY = "YOUR_NREL_API_KEY";  // Placeholder for NREL API key
+const NREL_BASE_URL = "https://developer.nrel.gov/api/alt-fuel-stations/v1/nearest.json";
+
+function App() {
+  // State variables
+  const [stations, setStations] = useState([]);         // Array of station results
+  const [loading, setLoading] = useState(false);        // Loading indicator
+  const [error, setError] = useState(null);             // Error message
+  const [searchLocation, setSearchLocation] = useState(null); // {lat, lon} of current search center
+  const [fuelFilter, setFuelFilter] = useState([]);     // Array of selected fuel type codes (empty = all)
+
+  // Utility: Convert fuel code to human-readable name (for display)
+  const fuelCodeToName = {
+    "ELEC": "Electric",
+    "CNG": "Compressed Natural Gas",
+    "LPG": "Propane (LPG)",
+    "LNG": "Liquefied Natural Gas",
+    "E85": "Ethanol (E85)",
+    "BD": "Biodiesel",
+    "HY": "Hydrogen",
+    "RD": "Renewable Diesel"
+  };
+
+  // Geocoding function: turn an address or place query into coordinates using Nominatim (OSM)
+  async function geocodeLocation(query) {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Geocoding request failed");
+    const data = await res.json();
+    if (data && data.length > 0) {
+      const { lat, lon } = data[0];
+      return { lat: parseFloat(lat), lon: parseFloat(lon) };
+    } else {
+      throw new Error("Location not found. Please try a different query.");
+    }
+  }
+
+  // Fetch station data from NREL API using given latitude, longitude, and fuel filter
+  async function fetchStationsByCoord(lat, lon) {
+    setLoading(true);
+    setError(null);
+    try {
+      // Construct API URL with query params
+      let url = `${NREL_BASE_URL}?api_key=${NREL_API_KEY}&latitude=${lat}&longitude=${lon}`;
+      // Include fuel type filter if any selected
+      if (fuelFilter.length > 0) {
+        const fuelParam = fuelFilter.join(",");
+        url += `&fuel_type=${fuelParam}`;
+      }
+      // (Optional: we could add &radius=... if we want a custom search radius)
+      const res = await fetch(url);
+      if (!res.ok) {
+        throw new Error(\`NREL API request failed with status \${res.status}\`);
+      }
+      const resultJson = await res.json();
+      // The JSON has a "fuel_stations" array with station objects
+      const stationsData = resultJson.fuel_stations;
+      setStations(stationsData);
+      setSearchLocation({ lat, lon });  // Save current center
+    } catch (err) {
+      console.error("Error fetching stations:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Handler for when the user submits the search form (with a text location)
+  const handleSearchLocation = async (locationQuery) => {
+    if (!locationQuery) return;
+    try {
+      setLoading(true);
+      setError(null);
+      // Geocode the location query to get coordinates
+      const coords = await geocodeLocation(locationQuery);
+      // Now fetch stations near this coordinate
+      await fetchStationsByCoord(coords.lat, coords.lon);
+    } catch (err) {
+      setError(err.message);
+      setStations([]); // clear previous results if any
+      setSearchLocation(null);
+      setLoading(false);
+    }
+  };
+
+  // Handler for when user clicks "Use My Location"
+  const handleUseMyLocation = () => {
+    if (!("geolocation" in navigator)) {
+      setError("Geolocation is not supported by your browser");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        // Fetch stations near the current position
+        fetchStationsByCoord(latitude, longitude);
+      },
+      (geoError) => {
+        console.error("Geolocation error:", geoError);
+        setError("Unable to retrieve your location");
+        setLoading(false);
+      }
+    );
+  };
+
+  // Handler for fuel filter changes (when checkboxes are toggled)
+  const handleFuelFilterChange = (fuelCode, checked) => {
+    setFuelFilter(prev => {
+      if (checked) {
+        // add the fuel code to the filter list
+        return prev.includes(fuelCode) ? prev : [...prev, fuelCode];
+      } else {
+        // remove the fuel code from the filter list
+        return prev.filter(code => code !== fuelCode);
+      }
+    });
+  };
+
+  return (
+    <div className="app-container" style={{ padding: "1rem" }}>
+      <h1>Alternative Fuel Station Locator</h1>
+      {/* Search and Filter Form */}
+      <SearchForm 
+        onSearch={handleSearchLocation}
+        onUseMyLocation={handleUseMyLocation}
+        onFuelFilterChange={handleFuelFilterChange}
+        fuelFilter={fuelFilter}
+      />
+
+      {/* Status messages */}
+      {loading && <p>Loading stations data...</p>}
+      {error && <p style={{ color: "red" }}>Error: {error}</p>}
+
+      {/* Map and List views (only show once we have stations or loading) */}
+      {stations.length > 0 && (
+        <div className="results-container" style={{ display: "flex", flexWrap: "wrap", marginTop: "1rem" }}>
+          {/* Map View */}
+          <div className="map-section" style={{ flex: "1 1 60%", minWidth: "300px", height: "400px" }}>
+            <MapView stations={stations} center={searchLocation} />
+          </div>
+          {/* List View */}
+          <div className="list-section" style={{ flex: "1 1 40%", minWidth: "300px", paddingLeft: "1rem" }}>
+            <StationList stations={stations} fuelCodeToName={fuelCodeToName} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;
+Explanation: In App.js, we maintain state for the station list, loading status, error messages, the current search coordinates, and fuel type filters. The fetchStationsByCoord function builds the API request URL with the required parameters (API key, latitude, longitude, and fuel types) and fetches the data from NRELdeveloper.nrel.govdeveloper.nrel.gov. We then save the returned fuel_stations array into state. We handle both the case of text-based search (using the handleSearchLocation which calls geocodeLocation then fetches) and the geolocation case (handleUseMyLocation uses navigator.geolocation). The fuel filter checkboxes call handleFuelFilterChange to update the filter state. The UI renders a <SearchForm> at the top, displays loading or error messages as needed, and once station data is available, it shows a <MapView> and <StationList> side by side. We applied some inline styles for layout (in a real project, these would likely be in a CSS file or use a CSS framework). The map section is given a fixed height and flexible width, and the list section flexes next to it. On small screens, the flex-wrap: wrap style ensures the two sections stack vertically.
+SearchForm.js
+This component renders the input field for location and the fuel type filter controls. It invokes callbacks to the App when a search is submitted or the user requests geolocation.
+// SearchForm.js
+import React, { useState } from "react";
+
+const fuelOptions = [
+  { code: "ELEC", label: "Electric" },
+  { code: "CNG", label: "CNG" },
+  { code: "LPG", label: "Propane (LPG)" },
+  { code: "LNG", label: "LNG" },
+  { code: "E85", label: "Ethanol (E85)" },
+  { code: "BD", label: "Biodiesel" },
+  { code: "HY", label: "Hydrogen" },
+  { code: "RD", label: "Renewable Diesel" },
+];
+
+function SearchForm({ onSearch, onUseMyLocation, onFuelFilterChange, fuelFilter }) {
+  const [locationInput, setLocationInput] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (locationInput.trim() !== "") {
+      onSearch(locationInput.trim());
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="search-form" style={{ marginBottom: "1rem" }}>
+      <div style={{ marginBottom: "0.5rem" }}>
+        {/* Location Input Field */}
+        <input 
+          type="text" 
+          value={locationInput} 
+          onChange={(e) => setLocationInput(e.target.value)} 
+          placeholder="Enter a city, address or ZIP code" 
+          style={{ width: "70%", padding: "0.5rem" }}
+        />
+        {/* Search Button */}
+        <button type="submit" style={{ padding: "0.5rem 1rem", marginLeft: "0.5rem" }}>
+          Find Stations
+        </button>
+        {/* Use My Location Button */}
+        <button type="button" onClick={onUseMyLocation} style={{ padding: "0.5rem 1rem", marginLeft: "0.5rem" }}>
+          Use My Location
+        </button>
+      </div>
+      {/* Fuel Type Filters (Checkboxes) */}
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center" }}>
+        <span style={{ marginRight: "0.5rem" }}><strong>Filter fuels:</strong></span>
+        {fuelOptions.map(opt => (
+          <label key={opt.code} style={{ marginRight: "1rem", fontWeight: "normal" }}>
+            <input 
+              type="checkbox" 
+              value={opt.code} 
+              onChange={(e) => onFuelFilterChange(opt.code, e.target.checked)} 
+              checked={fuelFilter.includes(opt.code)}
+            /> {opt.label}
+          </label>
+        ))}
+      </div>
+    </form>
+  );
+}
+
+export default SearchForm;
+Explanation: The SearchForm component keeps an internal state for the text input. It renders an input box for the location query and two buttons: one to submit the form (trigger a search by location text) and one to use geolocation. The fuel type filter is implemented as a series of checkboxes for each fuel type option. The options are defined in an array for easy iteration. When a checkbox is toggled, we call onFuelFilterChange (provided by App) with the fuel code and whether it’s checked. This will update the filter state in App. The form’s submit event calls handleSubmit, which invokes onSearch (also provided by App) with the current input text. We use basic inline styling to arrange elements. The filter section uses flex wrap so that on smaller screens, the checkboxes break into multiple lines if needed. The placeholder text in the input guides the user on what they can enter.
+MapView.js
+This component is responsible for rendering the interactive map and station markers. We use React Leaflet’s <MapContainer> for the map and <Marker> for each station.
+// MapView.js
+import React from "react";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import L from "leaflet";
+
+// Fix default icon issue in Leaflet (optional workaround for correct marker icons)
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+});
+
+function MapView({ stations, center }) {
+  // If no center given (no search yet), we can render an empty fragment or a placeholder
+  if (!center) {
+    return <p>No location selected.</p>;
+  }
+
+  const { lat, lon } = center;
+  const mapCenter = [lat, lon];
+  const zoomLevel = 13;  // default zoom level when focusing on a city/area
+
+  return (
+    <MapContainer center={mapCenter} zoom={zoomLevel} scrollWheelZoom={true} style={{ height: "100%", width: "100%" }}>
+      {/* OpenStreetMap tile layer */}
+      <TileLayer
+        attribution='&copy; <a href="https://osm.org/copyright">OSM</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      {/* Markers for each station */}
+      {stations.map(station => (
+        <Marker key={station.id} position={[station.latitude, station.longitude]}>
+          <Popup>
+            <div>
+              <strong>{station.station_name}</strong><br/>
+              Fuel: {station.fuel_type_code}<br/>
+              {station.street_address}, {station.city}, {station.state} {station.zip}
+            </div>
+          </Popup>
+        </Marker>
+      ))}
+    </MapContainer>
+  );
+}
+
+export default MapView;
+Explanation: In MapView.js, we utilize components from react-leaflet. We first address a common issue with Leaflet’s default icon paths when used with bundlers by resetting the _getIconUrl and merging options to use URLs from a CDN – this ensures the default marker icon loads correctly (this is a known workaround; alternatively, we could import images or use a custom marker icon). The MapContainer is initialized with a center (latitude/longitude array) and a default zoom. We use the OpenStreetMap tile layer for map tiles (no API key required). We then iterate over the stations prop to create a <Marker> for each station, positioning it at the station’s coordinates. Each marker has a <Popup> that opens on click, displaying the station’s name, fuel type code, and address. (For brevity, we show the fuel type code here; one could map it to a friendly name similarly to how we do in the list.) The map’s container is styled to take full width and height of its parent container, which in our layout is a flex item set to a certain height. Users can scroll/zoom the map (scrollWheelZoom enabled).
+StationList.js
+This component displays the list of station details and includes the directions link for each station.
+// StationList.js
+import React from "react";
+
+function StationList({ stations, fuelCodeToName }) {
+  if (!stations || stations.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="station-list">
+      {stations.map(station => {
+        // Format full address
+        const fullAddress = `${station.street_address}, ${station.city}, ${station.state} ${station.zip}`;
+        // Human-readable fuel type (or multiple types if applicable)
+        const fuelName = fuelCodeToName[station.fuel_type_code] || station.fuel_type_code;
+        // Directions URL (using Google Maps)
+        const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${station.latitude},${station.longitude}`;
+
+        return (
+          <div key={station.id} className="station-item" style={{ marginBottom: "1rem", borderBottom: "1px solid #ccc", paddingBottom: "0.5rem" }}>
+            <h3 style={{ margin: "0 0 0.2rem 0" }}>{station.station_name}</h3>
+            <p style={{ margin: "0.2rem 0" }}>
+              <strong>Address:</strong> {fullAddress}<br/>
+              <strong>Fuel Type:</strong> {fuelName}<br/>
+              <strong>Hours:</strong> {station.access_days_time || "Not available"}
+            </p>
+            <a href={directionsUrl} target="_blank" rel="noopener noreferrer" style={{ color: "blue" }}>
+              Get Directions
+            </a>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export default StationList;
+Explanation: The StationList component receives the stations array and the mapping object fuelCodeToName (to translate codes to names). It iterates through each station and renders a styled block for each. We compose the full address from street, city, state, zip fields. We determine the fuel type name: using the mapping for known codes, otherwise falling back to the raw code. We build a Google Maps Directions URL with the station’s coordinates as the destination. Each station entry displays the name (as an <h3>), address, fuel type, and operating hours. The hours come from station.access_days_time which typically contains a string like "24 hours daily" or specific hoursdeveloper.nrel.gov. If that field is empty or not provided, we display "Not available". Finally, the “Get Directions” link opens Google Maps in a new tab (target="_blank" with rel="noopener noreferrer" for security). We added some basic styling: a bottom border to separate entries and small margin/padding for readability.
+Running and Using the App
+With the above code in place, you would ensure your API key is inserted in the NREL_API_KEY constant. The app can then be started (e.g., with npm start if using Create React App). On launch, you will see a heading and the search form. The user can type a location (like "Chicago, IL" or a specific address or ZIP code) and click "Find Stations", or click "Use My Location" to let the browser provide their coordinates. After initiating a search, the app fetches station data from NREL near the specified locationdeveloper.nrel.govdeveloper.nrel.gov (with any selected fuel filters applied). The map will center on that location and display markers for each station found. The list on the right will show the station details including name, address, fuel type, and hours of operation, pulled from the NREL datadeveloper.nrel.govdeveloper.nrel.gov. The user can click on a marker to see the station name and address, or find the same station in the list. By clicking "Get Directions" for a station, a new tab will open Google Maps directing the user to that station’s locationgithub.com.
+Because we built the app with responsiveness in mind, it works on mobile devices as well. On a narrow screen, the map will appear on top and the list below it (instead of side by side), so users can scroll through results easily. All interactive elements (buttons, checkboxes, map markers) are usable on both desktop and touch devices.
+Summary
+We have created a modular React application that fulfills the requirements: it integrates the NREL Alternative Fuel Stations API to find nearby alternative fuel stations based on user-provided location or geolocation, allows filtering by fuel type, and presents the results on an interactive map and a corresponding list with station details and external directions links. This solution leverages the robust data from NREL (covering electric charging, CNG, hydrogen, etc. across the USdeveloper.nrel.gov) and familiar mapping tools to provide a seamless user experience for finding alternative fueling stations. By structuring the app into components and using standard APIs and libraries, the codebase remains organized and maintainable, allowing for future enhancements such as additional filters (e.g., limiting distance) or integrating a different map provider if needed. The result is a responsive, user-friendly interface that can help promote the use of alternative fuels by making station information easily accessible.
+Sources:
+* NREL Alternative Fuel Stations API – Developer Documentationdeveloper.nrel.govdeveloper.nrel.govdeveloper.nrel.gov (for API usage, fuel type codes, and data fields)
+* GitHub: Alternative Fuel Tracker – project READMEgithub.comgithub.com (inspiration and confirmation of features like search, filter, map, directions)
+* MDN Web Docs – Geolocation API Referencedeveloper.mozilla.org (for using browser geolocation securely)
+

@@ -1,0 +1,297 @@
+Let’s create a modular "Find a Charger" feature that can be easily integrated into this site. Based on the codebase architecture, here are the requirements you need to follow:
+
+## ??? **Architecture Requirements**
+
+### **1. File Structure Pattern**
+Follow the established `.query.ts` and `.service.ts` pattern:
+
+```
+src/components/charger-finder/
+??? index.tsx                    # Main export
+??? charger-finder.view.tsx      # Presentation component
+??? charger-finder.service.ts    # Business logic
+??? charger-finder.query.ts      # API calls
+??? charger-finder.type.ts       # TypeScript interfaces
+??? charger-finder.context.tsx   # Context (if needed)
+??? components/                  # Sub-components
+    ??? charger-map.tsx
+    ??? charger-list.tsx
+    ??? charger-filters.tsx
+    ??? charger-popup.tsx
+```
+
+### **2. Component Architecture**
+
+
+[1 tool called]
+
+## ?? **Detailed Requirements**
+
+### **3. Component Design Pattern**
+```typescript
+// charger-finder.view.tsx
+import { forwardRef } from 'react';
+import { type VariantProps, cva } from 'class-variance-authority';
+import { cn } from 'utils/cn';
+import { useChargerFinderService } from './charger-finder.service';
+
+const chargerFinderVariants = cva(
+  "relative w-full",
+  {
+    variants: {
+      variant: {
+        popup: "max-w-md max-h-96 overflow-hidden",
+        standalone: "min-h-[600px]",
+        embedded: "h-full"
+      },
+      size: {
+        sm: "text-sm",
+        default: "text-base",
+        lg: "text-lg"
+      }
+    },
+    defaultVariants: {
+      variant: "standalone",
+      size: "default"
+    }
+  }
+);
+
+interface ChargerFinderProps extends VariantProps<typeof chargerFinderVariants> {
+  className?: string;
+  onChargerSelect?: (charger: ChargerData) => void;
+  initialLocation?: { lat: number; lng: number };
+}
+
+const ChargerFinder = forwardRef<HTMLDivElement, ChargerFinderProps>(
+  ({ className, variant, size, onChargerSelect, initialLocation, ...props }, ref) => {
+    const service = useChargerFinderService({ initialLocation });
+    
+    return (
+      <div
+        ref={ref}
+        className={cn(chargerFinderVariants({ variant, size, className }))}
+        {...props}
+      >
+        {/* Component content */}
+      </div>
+    );
+  }
+);
+
+ChargerFinder.displayName = 'ChargerFinder';
+export { ChargerFinder, chargerFinderVariants };
+```
+
+### **4. Service Layer Pattern**
+```typescript
+// charger-finder.service.ts
+import { useState, useMemo, useEffect } from 'react';
+import { useGetChargers, useGetChargerDetails } from './charger-finder.query';
+
+interface ChargerFinderServiceProps {
+  initialLocation?: { lat: number; lng: number };
+}
+
+const useChargerFinderService = ({ initialLocation }: ChargerFinderServiceProps) => {
+  const [location, setLocation] = useState(initialLocation);
+  const [filters, setFilters] = useState<ChargerFilters>({});
+  const [selectedCharger, setSelectedCharger] = useState<ChargerData | null>(null);
+
+  const { data: chargers, isLoading, error } = useGetChargers(location, filters);
+
+  const filteredChargers = useMemo(() => {
+    return processChargers(chargers, filters);
+  }, [chargers, filters]);
+
+  const handleLocationChange = (newLocation: { lat: number; lng: number }) => {
+    setLocation(newLocation);
+  };
+
+  const handleFilterChange = (newFilters: Partial<ChargerFilters>) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
+  };
+
+  return {
+    // State
+    chargers: filteredChargers,
+    selectedCharger,
+    location,
+    filters,
+    isLoading,
+    error,
+    
+    // Actions
+    setLocation: handleLocationChange,
+    setFilters: handleFilterChange,
+    setSelectedCharger,
+  };
+};
+
+export default useChargerFinderService;
+```
+
+### **5. Query Layer Pattern**
+```typescript
+// charger-finder.query.ts
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiInstance } from 'settings/axios-setting';
+
+const fetchChargers = async (location: LocationData, filters: ChargerFilters) => {
+  const response = await apiInstance.get('/chargers', {
+    params: { ...location, ...filters }
+  });
+  return response.data;
+};
+
+export const useGetChargers = (location?: LocationData, filters?: ChargerFilters) => {
+  return useQuery({
+    queryKey: ['chargers', location, filters],
+    queryFn: () => fetchChargers(location!, filters!),
+    enabled: !!location,
+    select: (data) => data?.data || [],
+  });
+};
+
+export const useGetChargerDetails = (chargerId: string) => {
+  return useQuery({
+    queryKey: ['chargerDetails', chargerId],
+    queryFn: () => apiInstance.get(`/chargers/${chargerId}`).then(res => res.data),
+    enabled: !!chargerId,
+  });
+};
+```
+
+### **6. TypeScript Interfaces**
+```typescript
+// charger-finder.type.ts
+export interface ChargerData {
+  id: string;
+  name: string;
+  address: string;
+  coordinates: { lat: number; lng: number };
+  connectorTypes: string[];
+  powerOutput: number;
+  availability: 'available' | 'in-use' | 'offline';
+  pricing?: {
+    perKwh: number;
+    perHour?: number;
+  };
+}
+
+export interface ChargerFilters {
+  connectorTypes?: string[];
+  minPower?: number;
+  maxDistance?: number;
+  availability?: 'available' | 'all';
+}
+
+export interface LocationData {
+  lat: number;
+  lng: number;
+  address?: string;
+}
+```
+
+## ?? **Integration Requirements**
+
+### **7. Export Pattern**
+```typescript
+// index.tsx
+export { ChargerFinder } from './charger-finder.view';
+export { default as useChargerFinderService } from './charger-finder.service';
+export type { ChargerData, ChargerFilters, LocationData } from './charger-finder.type';
+```
+
+### **8. Usage Examples**
+
+**As a Popup:**
+```typescript
+import { ChargerFinder } from 'components/charger-finder';
+import { Dialog, DialogContent, DialogTrigger } from 'components/ui/dialog';
+
+const ChargerFinderPopup = () => (
+  <Dialog>
+    <DialogTrigger asChild>
+      <Button>Find Charger</Button>
+    </DialogTrigger>
+    <DialogContent className="max-w-4xl">
+      <ChargerFinder 
+        variant="popup" 
+        onChargerSelect={(charger) => console.log(charger)}
+      />
+    </DialogContent>
+  </Dialog>
+);
+```
+
+**As a Standalone Section:**
+```typescript
+import { ChargerFinder } from 'components/charger-finder';
+
+const ChargerFinderPage = () => (
+  <div className="container mx-auto py-8">
+    <h1>Find a Charger</h1>
+    <ChargerFinder 
+      variant="standalone"
+      initialLocation={{ lat: 40.7128, lng: -74.0060 }}
+    />
+  </div>
+);
+```
+
+## ?? **Technical Requirements**
+
+### **9. Dependencies to Use**
+- **Maps**: Use existing Google Maps integration (already configured)
+- **State Management**: Use existing store pattern if needed
+- **Styling**: Use Tailwind CSS with CVA variants
+- **Icons**: Use Lucide React (already in dependencies)
+- **Forms**: Use React Hook Form (already configured)
+
+### **10. API Integration**
+```typescript
+// Use existing axios instance
+import { apiInstance } from 'settings/axios-setting';
+
+// Follow existing error handling pattern
+try {
+  const response = await apiInstance.get('/chargers', { params });
+  return response.data;
+} catch (error) {
+  console.error('? Error fetching chargers:', error);
+  throw error;
+}
+```
+
+## ?? **Package Structure for GitHub**
+
+Create a separate package that can be installed:
+
+```json
+// package.json for charger-finder package
+{
+  "name": "@shaed/charger-finder",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "@tanstack/react-query": "^5.0.0",
+    "axios": "^1.0.0"
+  }
+}
+```
+
+## ? **Key Success Factors**
+
+1. **Modular Design**: Component should work independently
+2. **Flexible Props**: Support different variants and configurations
+3. **Type Safety**: Full TypeScript support
+4. **Performance**: Proper memoization and query caching
+5. **Accessibility**: Follow existing a11y patterns
+6. **Responsive**: Mobile-first design
+7. **Error Handling**: Graceful error states
+8. **Loading States**: Proper loading indicators
+
+This structure will make your charger finder feature easily integrable into the existing SHAED marketplace while maintaining the established patterns and quality standards!

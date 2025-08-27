@@ -1,0 +1,177 @@
+/* Theme CSS Variables for Charger Insights */
+
+/* Light Theme (Default) */
+.cevs-theme-light {
+  --cevs-bg: #ffffff;
+  --cevs-bg-secondary: #f8fafc;
+  --cevs-fg: #0f172a;
+  --cevs-fg-secondary: #475569;
+  --cevs-muted: #64748b;
+  --cevs-accent: #2563eb;
+  --cevs-accent-hover: #1d4ed8;
+  --cevs-border: #e2e8f0;
+  --cevs-border-hover: #cbd5e1;
+  --cevs-radius: 0.5rem;
+  --cevs-spacing: 1rem;
+  --cevs-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --cevs-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  
+  /* Status Colors */
+  --cevs-success: #10b981;
+  --cevs-warning: #f59e0b;
+  --cevs-error: #ef4444;
+  --cevs-info: #3b82f6;
+  
+  /* Map Colors */
+  --cevs-map-bg: #f8fafc;
+  --cevs-map-border: #e2e8f0;
+  --cevs-marker-color: #2563eb;
+  --cevs-marker-selected: #dc2626;
+  
+  /* Station Status Colors */
+  --cevs-station-available: #10b981;
+  --cevs-station-unavailable: #ef4444;
+  --cevs-station-unknown: #6b7280;
+}
+
+/* Dark Theme */
+.cevs-theme-dark {
+  --cevs-bg: #0f172a;
+  --cevs-bg-secondary: #1e293b;
+  --cevs-fg: #f8fafc;
+  --cevs-fg-secondary: #cbd5e1;
+  --cevs-muted: #94a3b8;
+  --cevs-accent: #3b82f6;
+  --cevs-accent-hover: #2563eb;
+  --cevs-border: #334155;
+  --cevs-border-hover: #475569;
+  --cevs-radius: 0.5rem;
+  --cevs-spacing: 1rem;
+  --cevs-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+  --cevs-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+  
+  /* Status Colors */
+  --cevs-success: #22c55e;
+  --cevs-warning: #fbbf24;
+  --cevs-error: #f87171;
+  --cevs-info: #60a5fa;
+  
+  /* Map Colors */
+  --cevs-map-bg: #1e293b;
+  --cevs-map-border: #334155;
+  --cevs-marker-color: #3b82f6;
+  --cevs-marker-selected: #f87171;
+  
+  /* Station Status Colors */
+  --cevs-station-available: #22c55e;
+  --cevs-station-unavailable: #f87171;
+  --cevs-station-unknown: #9ca3af;
+}
+
+/* Auto Theme (follows system preference) */
+.cevs-theme-auto {
+  /* Light theme by default */
+  --cevs-bg: #ffffff;
+  --cevs-bg-secondary: #f8fafc;
+  --cevs-fg: #0f172a;
+  --cevs-fg-secondary: #475569;
+  --cevs-muted: #64748b;
+  --cevs-accent: #2563eb;
+  --cevs-accent-hover: #1d4ed8;
+  --cevs-border: #e2e8f0;
+  --cevs-border-hover: #cbd5e1;
+  --cevs-radius: 0.5rem;
+  --cevs-spacing: 1rem;
+  --cevs-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --cevs-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  
+  /* Status Colors */
+  --cevs-success: #10b981;
+  --cevs-warning: #f59e0b;
+  --cevs-error: #ef4444;
+  --cevs-info: #3b82f6;
+  
+  /* Map Colors */
+  --cevs-map-bg: #f8fafc;
+  --cevs-map-border: #e2e8f0;
+  --cevs-marker-color: #2563eb;
+  --cevs-marker-selected: #dc2626;
+  
+  /* Station Status Colors */
+  --cevs-station-available: #10b981;
+  --cevs-station-unavailable: #ef4444;
+  --cevs-station-unknown: #6b7280;
+}
+
+/* Dark mode media query for auto theme */
+@media (prefers-color-scheme: dark) {
+  .cevs-theme-auto {
+    --cevs-bg: #0f172a;
+    --cevs-bg-secondary: #1e293b;
+    --cevs-fg: #f8fafc;
+    --cevs-fg-secondary: #cbd5e1;
+    --cevs-muted: #94a3b8;
+    --cevs-accent: #3b82f6;
+    --cevs-accent-hover: #2563eb;
+    --cevs-border: #334155;
+    --cevs-border-hover: #475569;
+    --cevs-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+    --cevs-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+    
+    /* Status Colors */
+    --cevs-success: #22c55e;
+    --cevs-warning: #fbbf24;
+    --cevs-error: #f87171;
+    --cevs-info: #60a5fa;
+    
+    /* Map Colors */
+    --cevs-map-bg: #1e293b;
+    --cevs-map-border: #334155;
+    --cevs-marker-color: #3b82f6;
+    --cevs-marker-selected: #f87171;
+    
+    /* Station Status Colors */
+    --cevs-station-available: #22c55e;
+    --cevs-station-unavailable: #f87171;
+    --cevs-station-unknown: #9ca3af;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .cevs-theme-light,
+  .cevs-theme-dark,
+  .cevs-theme-auto {
+    --cevs-border: #000000;
+    --cevs-border-hover: #000000;
+    --cevs-accent: #0000ff;
+    --cevs-accent-hover: #0000cc;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .cevs-theme-light,
+  .cevs-theme-dark,
+  .cevs-theme-auto {
+    --cevs-transition-duration: 0s;
+  }
+}
+
+/* Focus visible styles for accessibility */
+.cevs-focus-visible {
+  outline: 2px solid var(--cevs-accent);
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .cevs-theme-light,
+  .cevs-theme-dark,
+  .cevs-theme-auto {
+    --cevs-bg: #ffffff;
+    --cevs-fg: #000000;
+    --cevs-border: #000000;
+    --cevs-accent: #000000;
+  }
+}
