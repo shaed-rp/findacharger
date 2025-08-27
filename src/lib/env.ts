@@ -3,6 +3,17 @@
  * Handles API keys and configuration with fallbacks
  */
 
+// Extend the existing ImportMeta interface for Vite environment variables
+declare global {
+  interface ImportMeta {
+    env?: {
+      VITE_NREL_API_KEY?: string;
+      VITE_NREL_BASE_URL?: string;
+      VITE_NOMINATIM_BASE_URL?: string;
+    };
+  }
+}
+
 export interface EnvConfig {
   nrelApiKey: string;
   nrelBaseUrl: string;
@@ -19,7 +30,16 @@ export function getEnvConfig(overrides?: Partial<EnvConfig>): EnvConfig {
   // In browser environment, we can't access process.env directly
   // Use import.meta.env for Vite or window.__ENV__ for other bundlers
   const browserEnv = typeof window !== 'undefined' ? (window as any).__ENV__ : {};
-  const viteEnv = typeof import.meta !== 'undefined' ? import.meta.env : {};
+  
+  // Safely access import.meta.env with proper type checking
+  let viteEnv: Record<string, string | undefined> = {};
+  try {
+    if (typeof import.meta !== 'undefined' && import.meta?.env) {
+      viteEnv = import.meta.env as Record<string, string | undefined>;
+    }
+  } catch {
+    // Ignore errors in environments where import.meta is not available
+  }
   
   // Safely access process.env only if it exists
   const processEnv = typeof process !== 'undefined' && process.env ? process.env : {};
