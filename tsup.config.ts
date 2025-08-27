@@ -18,5 +18,5 @@ export default defineConfig({
       js: '"use client";',
     };
   },
-  onSuccess: 'cp src/styles.css dist/ && cp src/theme.css dist/',
+  onSuccess: 'echo "Build completed successfully"',
 });

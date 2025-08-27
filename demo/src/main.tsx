@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ChargerFinder } from '../../src/components/ChargerFinder';
-import '../../src/styles.css';
-import '../../src/theme.css';
+import { ChargerFinder } from '@commercialevs/charger-insights';
+import '@commercialevs/charger-insights/styles.css';
+import '@commercialevs/charger-insights/theme.css';
 import './index.css';
 
 // Create a query client for the demo
