@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Station } from '../types/nrel';
 import { clsx } from 'clsx';
 

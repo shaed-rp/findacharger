@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { GeocodingService } from '../lib/geocode';
-import { GeolocationPosition, GeolocationError } from '../types/nrel';
 
 export interface GeolocationState {
   location: { lat: number; lng: number } | null;
@@ -136,16 +135,16 @@ export function useLocationWatcher(options: UseGeolocationOptions & { watchId?: 
         setLocation({ lat: latitude, lng: longitude });
         setError(null);
       },
-      (error: GeolocationError) => {
+      (error: GeolocationPositionError) => {
         let message: string;
         switch (error.code) {
-          case error.PERMISSION_DENIED:
+          case 1: // PERMISSION_DENIED
             message = 'Location permission denied. Please enable location access.';
             break;
-          case error.POSITION_UNAVAILABLE:
+          case 2: // POSITION_UNAVAILABLE
             message = 'Location information is unavailable.';
             break;
-          case error.TIMEOUT:
+          case 3: // TIMEOUT
             message = 'Location request timed out.';
             break;
           default:

@@ -12,6 +12,7 @@ export interface FetchError extends Error {
   status?: number;
   code?: string;
   url?: string;
+  cause?: unknown;
 }
 
 /**

@@ -1,4 +1,4 @@
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { NRELService } from '../lib/nrel';
 import { SearchParams, Station } from '../types/nrel';
 
@@ -30,7 +30,10 @@ export function useChargerSearch(
         throw new Error('Search parameters are required');
       }
 
-      const service = new NRELService({ nrelApiKey: apiKey, nrelBaseUrl: baseUrl });
+      const service = new NRELService({ 
+        nrelApiKey: apiKey, 
+        nrelBaseUrl: baseUrl 
+      });
       
       // Validate parameters
       const errors = service.validateSearchParams(params);
@@ -55,7 +58,10 @@ export function useFuelTypes(options?: { apiKey?: string; baseUrl?: string }) {
   return useQuery({
     queryKey: ['fuel-types'],
     queryFn: () => {
-      const service = new NRELService(options);
+      const service = new NRELService({ 
+        nrelApiKey: options?.apiKey, 
+        nrelBaseUrl: options?.baseUrl 
+      });
       return service.getFuelTypes();
     },
     staleTime: Infinity, // Fuel types don't change often
@@ -70,7 +76,10 @@ export function useConnectorTypes(options?: { apiKey?: string; baseUrl?: string 
   return useQuery({
     queryKey: ['connector-types'],
     queryFn: () => {
-      const service = new NRELService(options);
+      const service = new NRELService({ 
+        nrelApiKey: options?.apiKey, 
+        nrelBaseUrl: options?.baseUrl 
+      });
       return service.getConnectorTypes();
     },
     staleTime: Infinity, // Connector types don't change often
@@ -121,7 +130,10 @@ export function useInfiniteChargerSearch(
         throw new Error('Search parameters are required');
       }
 
-      const service = new NRELService(options);
+      const service = new NRELService({ 
+        nrelApiKey: options?.apiKey, 
+        nrelBaseUrl: options?.baseUrl 
+      });
       
       const searchParams = {
         ...params,
@@ -132,7 +144,7 @@ export function useInfiniteChargerSearch(
       return service.fetchStations(searchParams);
     },
     initialPageParam: 1,
-    getNextPageParam: (lastPage, allPages) => {
+    getNextPageParam: (lastPage: Station[], allPages: Station[][]) => {
       // If we got fewer results than requested, we've reached the end
       if (lastPage.length < pageSize) {
         return undefined;

@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Station } from '../types/nrel';
 import { StationCard } from './StationCard';
 import { clsx } from 'clsx';

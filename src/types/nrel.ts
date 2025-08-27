@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import React from 'react';
 
 // NREL API Response Schemas
 export const NRELStationSchema = z.object({
@@ -40,14 +41,11 @@ export const NRELStationSchema = z.object({
   facility_type: z.string().optional(),
   geocode_status: z.string().optional(),
   date_last_confirmed: z.string().optional(),
-  id: z.number(),
   updated_at: z.string().optional(),
   owner_type_code: z.string().optional(),
   federal_agency_id: z.number().optional(),
   federal_agency_name: z.string().optional(),
   open_date: z.string().optional(),
-  access_code: z.string().optional(),
-  access_detail_code: z.string().optional(),
   federal_agency_code: z.string().optional(),
   facility_id: z.number().optional(),
 });

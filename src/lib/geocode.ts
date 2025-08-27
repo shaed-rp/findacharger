@@ -1,6 +1,5 @@
 import { fetchJson, createUrl } from './fetcher';
 import { getEnvConfig } from './env';
-import { GeolocationPosition, GeolocationError } from '../types/nrel';
 
 /**
  * Geocoding service using Nominatim and browser geolocation
@@ -73,16 +72,16 @@ export class GeocodingService {
           const { latitude, longitude } = position.coords;
           resolve({ lat: latitude, lng: longitude });
         },
-        (error: GeolocationError) => {
+        (error: GeolocationPositionError) => {
           let message: string;
           switch (error.code) {
-            case error.PERMISSION_DENIED:
+            case 1: // PERMISSION_DENIED
               message = 'Location permission denied. Please enable location access.';
               break;
-            case error.POSITION_UNAVAILABLE:
+            case 2: // POSITION_UNAVAILABLE
               message = 'Location information is unavailable.';
               break;
-            case error.TIMEOUT:
+            case 3: // TIMEOUT
               message = 'Location request timed out.';
               break;
             default:

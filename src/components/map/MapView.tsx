@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { useEffect, useMemo } from 'react';
+import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import { LatLngExpression } from 'leaflet';
 import { Station } from '../../types/nrel';
 import { StationMarker } from './StationMarker';
@@ -61,18 +61,7 @@ export function MapView({
 }: MapViewProps) {
   const mapCenter: LatLngExpression = useMemo(() => [center.lat, center.lng], [center.lat, center.lng]);
 
-  // Calculate map bounds if we have stations
-  const bounds = useMemo(() => {
-    if (stations.length === 0) return null;
-    
-    const lats = stations.map(s => s.location.lat);
-    const lngs = stations.map(s => s.location.lng);
-    
-    return [
-      [Math.min(...lats), Math.min(...lngs)],
-      [Math.max(...lats), Math.max(...lngs)],
-    ] as LatLngExpression[];
-  }, [stations]);
+
 
   return (
     <div 

@@ -47,7 +47,7 @@ export function isBrowser(): boolean {
  * Check if we're running in a Node.js environment
  */
 export function isNode(): boolean {
-  return typeof process !== 'undefined' && process.versions?.node;
+  return typeof process !== 'undefined' && !!process.versions?.node;
 }
 
 /**

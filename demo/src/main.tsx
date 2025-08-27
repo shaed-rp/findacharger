@@ -61,7 +61,7 @@ function DemoApp() {
             </button>
           </form>
           <div className="mt-4 text-sm text-gray-500">
-            <p>Don't have an API key? Get one at:</p>
+            <p>Don&apos;t have an API key? Get one at:</p>
             <a
               href="https://developer.nrel.gov/signup/"
               target="_blank"

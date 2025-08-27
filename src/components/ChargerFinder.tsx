@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { clsx } from 'clsx';
 import { SearchBar } from './SearchBar';
@@ -12,7 +12,7 @@ import {
   SearchParams, 
   FilterOptions, 
   ViewMode, 
-  Theme, 
+ 
   Station 
 } from '../types/nrel';
 
@@ -94,7 +94,8 @@ export function ChargerFinder({
   }, []);
 
   // Handle search
-  const handleSearch = useCallback((query: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleSearch = useCallback((_query: string) => {
     if (onSearch && currentLocation) {
       onSearch({
         location: currentLocation,
