@@ -65,10 +65,18 @@ export class NRELService {
 
     // Parse EVSE counts
     const evseCounts = {
-      level1: nrelStation.ev_level1_evse_num ? parseInt(nrelStation.ev_level1_evse_num, 10) : undefined,
-      level2: nrelStation.ev_level2_evse_num ? parseInt(nrelStation.ev_level2_evse_num, 10) : undefined,
-      dcFast: nrelStation.ev_dc_fast_num ? parseInt(nrelStation.ev_dc_fast_num, 10) : undefined,
-      other: nrelStation.ev_other_evse ? parseInt(nrelStation.ev_other_evse, 10) : undefined,
+      level1: nrelStation.ev_level1_evse_num ? 
+        (typeof nrelStation.ev_level1_evse_num === 'string' ? parseInt(nrelStation.ev_level1_evse_num, 10) : nrelStation.ev_level1_evse_num) : 
+        undefined,
+      level2: nrelStation.ev_level2_evse_num ? 
+        (typeof nrelStation.ev_level2_evse_num === 'string' ? parseInt(nrelStation.ev_level2_evse_num, 10) : nrelStation.ev_level2_evse_num) : 
+        undefined,
+      dcFast: nrelStation.ev_dc_fast_num ? 
+        (typeof nrelStation.ev_dc_fast_num === 'string' ? parseInt(nrelStation.ev_dc_fast_num, 10) : nrelStation.ev_dc_fast_num) : 
+        undefined,
+      other: nrelStation.ev_other_evse ? 
+        (typeof nrelStation.ev_other_evse === 'string' ? parseInt(nrelStation.ev_other_evse, 10) : undefined) : 
+        undefined,
     };
 
     // Determine status
@@ -96,7 +104,7 @@ export class NRELService {
       name: nrelStation.station_name,
       fuelType: nrelStation.fuel_type_code,
       status,
-      network: nrelStation.ev_network,
+      network: nrelStation.ev_network || undefined,
       connectorTypes,
       location: {
         lat: nrelStation.latitude,
@@ -110,13 +118,13 @@ export class NRELService {
         full: `${nrelStation.street_address}, ${nrelStation.city}, ${nrelStation.state} ${nrelStation.zip}`,
       },
       access: {
-        daysTime: nrelStation.access_days_time,
-        code: nrelStation.access_code,
-        detailCode: nrelStation.access_detail_code,
+        daysTime: nrelStation.access_days_time || undefined,
+        code: nrelStation.access_code || undefined,
+        detailCode: nrelStation.access_detail_code || undefined,
       },
-      pricing: nrelStation.ev_pricing,
-      phone: nrelStation.station_phone,
-      website: nrelStation.ev_network_web,
+      pricing: nrelStation.ev_pricing || undefined,
+      phone: nrelStation.station_phone || undefined,
+      website: nrelStation.ev_network_web || undefined,
       distance,
       evseCounts,
     };
