@@ -24,6 +24,7 @@
   "scripts": {
     "dev": "vite --config demo/vite.config.ts",
     "build": "tsup src/index.ts --dts --format esm,cjs --sourcemap",
+    "build:demo": "npm run build && cd demo && npm install && npm run build",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "test": "vitest run",
