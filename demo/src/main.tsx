@@ -18,63 +18,8 @@ const queryClient = new QueryClient({
 });
 
 function DemoApp() {
-  const [apiKey, setApiKey] = React.useState('');
-  const [hasApiKey, setHasApiKey] = React.useState(false);
-
-  const handleApiKeySubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (apiKey.trim()) {
-      setHasApiKey(true);
-    }
-  };
-
-  if (!hasApiKey) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Charger Insights Demo
-          </h1>
-          <p className="text-gray-600 mb-6">
-            This demo requires an NREL API key to function. Please enter your API key below.
-          </p>
-          <form onSubmit={handleApiKeySubmit} className="space-y-4">
-            <div>
-              <label htmlFor="api-key" className="block text-sm font-medium text-gray-700 mb-1">
-                NREL API Key
-              </label>
-              <input
-                id="api-key"
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="Enter your NREL API key"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
-            >
-              Start Demo
-            </button>
-          </form>
-          <div className="mt-4 text-sm text-gray-500">
-            <p>Don&apos;t have an API key? Get one at:</p>
-            <a
-              href="https://developer.nrel.gov/signup/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
-            >
-              https://developer.nrel.gov/signup/
-            </a>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Use the API key from the API.txt file
+  const apiKey = 'm5yTajemu8TgV6U0j8QsDaDSr58DL2h7KXZXEMo2';
 
   return (
     <QueryClientProvider client={queryClient}>

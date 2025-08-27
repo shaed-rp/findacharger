@@ -16,13 +16,29 @@ export interface EnvConfig {
  * @throws Error if required configuration is missing
  */
 export function getEnvConfig(overrides?: Partial<EnvConfig>): EnvConfig {
+  // In browser environment, we can't access process.env directly
+  // Use import.meta.env for Vite or window.__ENV__ for other bundlers
+  const browserEnv = typeof window !== 'undefined' ? (window as any).__ENV__ : {};
+  const viteEnv = typeof import.meta !== 'undefined' ? import.meta.env : {};
+  
+  // Safely access process.env only if it exists
+  const processEnv = typeof process !== 'undefined' && process.env ? process.env : {};
+  
   const config: EnvConfig = {
-    nrelApiKey: overrides?.nrelApiKey || process.env.NREL_API_KEY || '',
-    nrelBaseUrl: overrides?.nrelBaseUrl || 
-      process.env.NREL_BASE_URL || 
+    nrelApiKey: overrides?.nrelApiKey ||
+      (processEnv && processEnv.NREL_API_KEY) ||
+      (browserEnv && browserEnv.NREL_API_KEY) ||
+      (viteEnv && viteEnv.VITE_NREL_API_KEY) ||
+      '',
+    nrelBaseUrl: overrides?.nrelBaseUrl ||
+      (processEnv && processEnv.NREL_BASE_URL) ||
+      (browserEnv && browserEnv.NREL_BASE_URL) ||
+      (viteEnv && viteEnv.VITE_NREL_BASE_URL) ||
       'https://developer.nrel.gov/api/alt-fuel-stations/v1/nearest.json',
-    nominatimBaseUrl: overrides?.nominatimBaseUrl || 
-      process.env.NOMINATIM_BASE_URL || 
+    nominatimBaseUrl: overrides?.nominatimBaseUrl ||
+      (processEnv && processEnv.NOMINATIM_BASE_URL) ||
+      (browserEnv && browserEnv.NOMINATIM_BASE_URL) ||
+      (viteEnv && viteEnv.VITE_NOMINATIM_BASE_URL) ||
       'https://nominatim.openstreetmap.org/search',
   };
 

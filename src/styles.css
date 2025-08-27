@@ -1,9 +1,9 @@
+/* Import Leaflet CSS for map components */
+@import 'leaflet/dist/leaflet.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import Leaflet CSS for map components */
-@import 'leaflet/dist/leaflet.css';
 
 /* Base styles for the charger finder component */
 @layer base {
@@ -63,7 +63,7 @@
   }
 
   .charger-finder__search-button {
-    @apply px-4 py-2 bg-cevs-accent text-white rounded-cevs hover:bg-cevs-accent/90 transition-colors;
+    @apply px-4 py-2 bg-cevs-accent text-white rounded-cevs hover:bg-blue-600 transition-colors;
   }
 
   /* Filters */
@@ -124,7 +124,7 @@
   }
 
   .charger-finder__station-card.selected {
-    @apply border-cevs-accent bg-cevs-accent/5;
+    @apply border-cevs-accent bg-blue-50;
   }
 
   .charger-finder__station-name {

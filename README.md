@@ -44,6 +44,46 @@ function App() {
 }
 ```
 
+## 🏃‍♂️ Running Locally
+
+### Prerequisites
+
+- Node.js 18+
+- NREL API key (free from [NREL Developer Network](https://developer.nrel.gov/signup/))
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/commercialevs/charger-insights.git
+cd charger-insights
+
+# Install dependencies
+npm install
+
+# Add your NREL API key to API.txt file
+cp API.txt.example API.txt
+# Edit API.txt and replace "your_nrel_api_key_here" with your actual NREL API key
+
+# Start the development server
+npm run dev
+```
+
+### Access the Demo
+
+- **URL**: http://localhost:5173
+- The demo will automatically load your API key from the `API.txt` file
+- No manual API key input required
+
+### Troubleshooting
+
+If you encounter issues:
+
+1. **CSS Errors**: The project uses custom Tailwind classes that are properly configured
+2. **API Key Issues**: Ensure your NREL API key is valid and in the `API.txt` file
+3. **Port Conflicts**: The demo runs on port 5173 by default
+4. **Browser Compatibility**: Works best with modern browsers (Chrome, Firefox, Safari, Edge)
+
 ## 🔧 Configuration
 
 ### Environment Variables
@@ -338,6 +378,31 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - 📖 Docs: [Storybook](https://commercialevs.github.io/charger-insights)
 
 ## 🔄 Changelog
+
+### [1.0.1] - 2024-01-XX
+
+#### Fixed
+- **API Response Validation**: Fixed Zod schema to handle NREL API response format
+  - Added support for `null` values in optional fields
+  - Fixed EVSE number fields to accept both strings and numbers
+  - Added support for boolean values in `e85_blender_pump` field
+  - Fixed `station_counts` field to handle object format
+- **Environment Configuration**: Improved browser environment handling
+  - Fixed `process.env` access in browser environment
+  - Added proper fallbacks for environment variables
+  - Enhanced API key configuration handling
+- **CSS Compilation**: Fixed Tailwind CSS compilation issues
+  - Resolved custom color opacity modifiers
+  - Fixed CSS import order for Leaflet styles
+- **Demo Application**: Enhanced local development experience
+  - Automatic API key loading from `API.txt` file
+  - Improved error handling and user feedback
+  - Better development server configuration
+
+#### Improved
+- **Type Safety**: Enhanced TypeScript types for better developer experience
+- **Error Handling**: More robust error handling for API responses
+- **Documentation**: Updated README with local development instructions
 
 ### [1.0.0] - 2024-01-XX
 
