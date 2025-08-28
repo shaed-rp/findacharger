@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "node copy-api-key.js && vite",
+    "build": "node copy-api-key.js && vite build",
+    "preview": "vite preview",
+    "copy-api-key": "node copy-api-key.js"
   },
   "dependencies": {
     "@commercialevs/charger-insights": "file:..",

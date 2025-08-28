@@ -7,6 +7,7 @@ import { ViewToggle } from './ViewToggle';
 import { MapView } from './map/MapView';
 import { StationList } from './StationList';
 import { useChargerSearch } from '../hooks/useChargerSearch';
+import { logger } from '../lib/logger';
 import { 
   ChargerFinderProps, 
   SearchParams, 
@@ -45,7 +46,6 @@ export function ChargerFinder({
   style,
   queryClient = defaultQueryClient,
 }: ChargerFinderProps & { queryClient?: QueryClient }) {
-  console.log('ChargerFinder rendering with props:', { apiKey, theme, view, defaultRadius });
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -77,7 +77,6 @@ function ChargerFinderContent({
   defaultFuelTypes = ['ELEC'],
   defaultNetworks = [],
   defaultConnectorTypes = [],
-  theme = 'auto',
   view = 'split',
   onStationSelect,
   onSearch,
@@ -85,6 +84,9 @@ function ChargerFinderContent({
   className,
   style,
 }: ChargerFinderProps) {
+  // Initialize logging
+  const componentLogger = logger.withContext('ChargerFinder');
+  
   // State management
   const [currentLocation, setCurrentLocation] = useState(initialLocation);
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
@@ -97,6 +99,18 @@ function ChargerFinderContent({
     openNow: false,
     unit: 'miles',
   });
+
+  // Log component initialization
+  useEffect(() => {
+    componentLogger.info('ChargerFinder component initialized', {
+      hasApiKey: !!apiKey,
+      initialLocation,
+      defaultRadius,
+      defaultFuelTypes,
+      view,
+      theme: 'auto' // We'll add theme support later
+    });
+  }, [componentLogger, apiKey, initialLocation, defaultRadius, defaultFuelTypes, view]);
 
   // Search parameters for API
   const searchParams = useMemo<SearchParams | null>(() => {
@@ -122,16 +136,23 @@ function ChargerFinderContent({
 
   // Handle errors
   useEffect(() => {
-    if (error && onError) {
-      onError(error);
+    if (error) {
+      componentLogger.error('ChargerFinder error occurred', {
+        error: error.message,
+        stack: error.stack
+      });
+      if (onError) {
+        onError(error);
+      }
     }
-  }, [error, onError]);
+  }, [error, onError, componentLogger]);
 
   // Handle location selection
   const handleLocationSelect = useCallback((location: { lat: number; lng: number }) => {
+    componentLogger.info('Location selected', { location });
     setCurrentLocation(location);
     setSelectedStation(null);
-  }, []);
+  }, [componentLogger]);
 
   // Handle search
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -147,11 +168,16 @@ function ChargerFinderContent({
 
   // Handle station selection
   const handleStationSelect = useCallback((station: Station) => {
+    componentLogger.info('Station selected', {
+      stationId: station.id,
+      stationName: station.station_name,
+      location: `${station.latitude}, ${station.longitude}`
+    });
     setSelectedStation(station);
     if (onStationSelect) {
       onStationSelect(station);
     }
-  }, [onStationSelect]);
+  }, [onStationSelect, componentLogger]);
 
   // Handle view change
   const handleViewChange = useCallback((newView: ViewMode) => {
@@ -230,14 +256,9 @@ function ChargerFinderContent({
     return Array.from(connectors).sort();
   }, [stations]);
 
-  // Theme class
-  const themeClass = useMemo(() => {
-    return `cevs-theme-${theme}`;
-  }, [theme]);
-
   return (
     <div
-      className={clsx('charger-finder', themeClass, className)}
+      className={clsx('charger-finder', className)}
       style={style}
       role="region"
       aria-label="Charging station finder"
@@ -274,9 +295,9 @@ function ChargerFinderContent({
         <div className="charger-finder__results">
           {isLoading && (
             <div className="charger-finder__loading">
-              <svg className="w-6 h-6 animate-spin mr-2" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              <svg style={{ width: '24px', height: '24px', marginRight: '8px', animation: 'spin 1s linear infinite' }} fill="none" viewBox="0 0 24 24">
+                <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
               </svg>
               Finding charging stations...
             </div>
@@ -284,11 +305,23 @@ function ChargerFinderContent({
 
           {error && (
             <div className="charger-finder__error" role="alert">
-              <p className="font-medium">Error loading stations</p>
-              <p className="text-sm">{error.message}</p>
+              <p style={{ fontWeight: '500', marginBottom: '0.5rem' }}>Error loading stations</p>
+              <p style={{ fontSize: '0.875rem', marginBottom: '1rem' }}>{error.message}</p>
               <button
                 onClick={() => refetch()}
-                className="mt-2 px-3 py-1 text-sm bg-cevs-accent text-white rounded hover:bg-cevs-accent-hover transition-colors"
+                style={{
+                  marginTop: '0.5rem',
+                  padding: '0.25rem 0.75rem',
+                  fontSize: '0.875rem',
+                  backgroundColor: '#2563eb',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '0.25rem',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
               >
                 Try again
               </button>

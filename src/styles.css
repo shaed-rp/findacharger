@@ -1,198 +1,342 @@
 /* Import Leaflet CSS for map components */
 @import 'leaflet/dist/leaflet.css';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* Base styles for the charger finder component */
-@layer base {
-  .charger-finder {
-    @apply font-sans text-sm;
-  }
-
-  /* Reset Leaflet marker icons for proper display */
-  .leaflet-default-icon-path {
-    background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iNDEiIHZpZXdCb3g9IjAgMCAyNSA0MSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyLjUgMEM1LjU5NiAwIDAgNS41OTYgMCAxMi41QzAgMTkuNDA0IDUuNTk2IDI1IDEyLjUgMjVDMTkuNDA0IDI1IDI1IDE5LjQwNCAyNSAxMi41QzI1IDUuNTk2IDE5LjQwNCAwIDEyLjUgMFoiIGZpbGw9IiMyNTYzZWIiLz4KPHBhdGggZD0iTTEyLjUgNkM4LjM2NCA2IDUgOS4zNjQgNSAxMy41QzUgMTcuNjM2IDguMzY0IDIxIDEyLjUgMjFDMTYuNjM2IDIxIDIwIDE3LjYzNiAyMCAxMy41QzIwIDkuMzY0IDE2LjYzNiA2IDEyLjUgNloiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=');
-  }
+.charger-finder {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #0f172a;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  overflow: hidden;
 }
 
-@layer components {
-  /* Charger Finder Container */
-  .charger-finder {
-    @apply relative w-full bg-cevs-bg text-cevs-fg border border-cevs-border rounded-cevs;
-  }
+/* Reset Leaflet marker icons for proper display */
+.leaflet-default-icon-path {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iNDEiIHZpZXdCb3g9IjAgMCAyNSA0MSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyLjUgMEM1LjU5NiAwIDAgNS41OTYgMCAxMi41QzAgMTkuNDA0IDUuNTk2IDI1IDEyLjUgMjVDMTkuNDA0IDI1IDI1IDE5LjQwNCAyNSAxMi41QzI1IDUuNTk2IDE5LjQwNCAwIDEyLjUgMFoiIGZpbGw9IiMyNTYzZWIiLz4KPHBhdGggZD0iTTEyLjUgNkM4LjM2NCA2IDUgOS4zNjQgNSAxMy41QzUgMTcuNjM2IDguMzY0IDIxIDEyLjUgMjFDMTYuNjM2IDIxIDIwIDE3LjYzNiAyMCAxMy41QzIwIDkuMzY0IDE2LjYzNiA2IDEyLjUgNloiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=');
+}
 
-  /* Header */
-  .charger-finder__header {
-    @apply flex items-center justify-between p-4 border-b border-cevs-border;
-  }
+/* Charger Finder Container */
+.charger-finder {
+  position: relative;
+  width: 100%;
+  background-color: #ffffff;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
 
-  .charger-finder__title {
-    @apply text-lg font-semibold text-cevs-fg;
-  }
+/* Header */
+.charger-finder__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
 
-  .charger-finder__close {
-    @apply p-1 rounded-full hover:bg-cevs-bg-secondary transition-colors;
-  }
+.charger-finder__title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+}
 
-  /* View Toggle */
-  .charger-finder__view-toggle {
-    @apply flex rounded-lg border border-cevs-border overflow-hidden;
-  }
+.charger-finder__close {
+  padding: 0.25rem;
+  border-radius: 9999px;
+  transition: background-color 0.2s;
+}
 
-  .charger-finder__view-toggle button {
-    @apply px-3 py-1.5 text-sm font-medium transition-colors;
-  }
+.charger-finder__close:hover {
+  background-color: #f8fafc;
+}
 
-  .charger-finder__view-toggle button.active {
-    @apply bg-cevs-accent text-white;
-  }
+/* View Toggle */
+.charger-finder__view-toggle {
+  display: flex;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
 
-  .charger-finder__view-toggle button:not(.active) {
-    @apply bg-cevs-bg text-cevs-muted hover:bg-cevs-bg-secondary;
-  }
+.charger-finder__view-toggle button {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
 
-  /* Search Bar */
-  .charger-finder__search {
-    @apply p-4 border-b border-cevs-border;
-  }
+.charger-finder__view-toggle button.active {
+  background-color: #2563eb;
+  color: white;
+}
 
-  .charger-finder__search-input {
-    @apply w-full px-3 py-2 border border-cevs-border rounded-cevs focus:outline-none focus:ring-2 focus:ring-cevs-accent focus:border-transparent;
-  }
+.charger-finder__view-toggle button:not(.active) {
+  background-color: #ffffff;
+  color: #64748b;
+}
 
-  .charger-finder__search-button {
-    @apply px-4 py-2 bg-cevs-accent text-white rounded-cevs hover:bg-blue-600 transition-colors;
-  }
+.charger-finder__view-toggle button:not(.active):hover {
+  background-color: #f8fafc;
+}
 
-  /* Filters */
-  .charger-finder__filters {
-    @apply p-4 border-b border-cevs-border space-y-4;
-  }
+/* Search Bar */
+.charger-finder__search {
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
 
-  .charger-finder__filter-group {
-    @apply space-y-2;
-  }
+.charger-finder__search-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
 
-  .charger-finder__filter-label {
-    @apply text-sm font-medium text-cevs-fg;
-  }
+.charger-finder__search-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
 
-  .charger-finder__filter-select {
-    @apply w-full px-3 py-2 border border-cevs-border rounded-cevs focus:outline-none focus:ring-2 focus:ring-cevs-accent focus:border-transparent;
-  }
+.charger-finder__search-button {
+  padding: 0.5rem 1rem;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
 
-  .charger-finder__filter-checkbox {
-    @apply flex items-center space-x-2;
-  }
+.charger-finder__search-button:hover {
+  background-color: #1d4ed8;
+}
 
-  .charger-finder__filter-checkbox input {
-    @apply rounded border-cevs-border text-cevs-accent focus:ring-cevs-accent;
-  }
+.charger-finder__search-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
-  /* Results */
-  .charger-finder__results {
-    @apply flex-1 min-h-0;
-  }
+/* Filters */
+.charger-finder__filters {
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
 
+.charger-finder__filter-group {
+  margin-bottom: 1rem;
+}
+
+.charger-finder__filter-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+}
+
+.charger-finder__filter-select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  background-color: white;
+}
+
+.charger-finder__filter-checkbox {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.charger-finder__filter-checkbox input {
+  margin-right: 0.5rem;
+}
+
+.charger-finder__filter-checkbox label {
+  font-size: 0.875rem;
+  color: #0f172a;
+}
+
+/* Results */
+.charger-finder__results {
+  flex: 1;
+  min-height: 0;
+}
+
+.charger-finder__results--split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.charger-finder__results--map {
+  height: 100%;
+}
+
+.charger-finder__results--list {
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* Map */
+.charger-finder__map {
+  height: 100%;
+  min-height: 400px;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+/* List */
+.charger-finder__list {
+  height: 100%;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+/* Station Card */
+.charger-finder__station-card {
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.charger-finder__station-card:hover {
+  border-color: #2563eb;
+}
+
+.charger-finder__station-card.selected {
+  border-color: #2563eb;
+  background-color: #eff6ff;
+}
+
+.charger-finder__station-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 0.25rem;
+}
+
+.charger-finder__station-address {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+.charger-finder__station-details {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.875rem;
+}
+
+.charger-finder__station-distance {
+  color: #2563eb;
+  font-weight: 500;
+}
+
+.charger-finder__station-connectors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.charger-finder__connector-tag {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  background-color: #f8fafc;
+  color: #64748b;
+  border-radius: 0.25rem;
+}
+
+/* Loading */
+.charger-finder__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #64748b;
+}
+
+/* Error */
+.charger-finder__error {
+  padding: 1rem;
+  color: #dc2626;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.5rem;
+  margin: 1rem;
+}
+
+/* Empty State */
+.charger-finder__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #64748b;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
   .charger-finder__results--split {
-    @apply grid grid-cols-1 lg:grid-cols-2 gap-4;
+    grid-template-columns: 1fr;
   }
 
-  .charger-finder__results--map {
-    @apply h-full;
-  }
-
-  .charger-finder__results--list {
-    @apply h-full overflow-y-auto;
-  }
-
-  /* Map */
   .charger-finder__map {
-    @apply h-full min-h-[400px] rounded-cevs overflow-hidden;
-  }
-
-  /* List */
-  .charger-finder__list {
-    @apply h-full overflow-y-auto space-y-2 p-4;
-  }
-
-  /* Station Card */
-  .charger-finder__station-card {
-    @apply p-4 border border-cevs-border rounded-cevs hover:border-cevs-accent transition-colors cursor-pointer;
-  }
-
-  .charger-finder__station-card.selected {
-    @apply border-cevs-accent bg-blue-50;
-  }
-
-  .charger-finder__station-name {
-    @apply text-base font-semibold text-cevs-fg mb-1;
-  }
-
-  .charger-finder__station-address {
-    @apply text-sm text-cevs-muted mb-2;
-  }
-
-  .charger-finder__station-details {
-    @apply flex items-center justify-between text-sm;
-  }
-
-  .charger-finder__station-distance {
-    @apply text-cevs-accent font-medium;
-  }
-
-  .charger-finder__station-connectors {
-    @apply flex flex-wrap gap-1;
-  }
-
-  .charger-finder__connector-tag {
-    @apply px-2 py-1 text-xs bg-cevs-bg-secondary text-cevs-muted rounded;
-  }
-
-  /* Loading */
-  .charger-finder__loading {
-    @apply flex items-center justify-center p-8 text-cevs-muted;
-  }
-
-  /* Error */
-  .charger-finder__error {
-    @apply p-4 text-red-600 bg-red-50 border border-red-200 rounded-cevs;
-  }
-
-  /* Empty State */
-  .charger-finder__empty {
-    @apply flex flex-col items-center justify-center p-8 text-cevs-muted;
-  }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .charger-finder__results--split {
-      @apply grid-cols-1;
-    }
-
-    .charger-finder__map {
-      @apply min-h-[300px];
-    }
+    min-height: 300px;
   }
 }
 
-@layer utilities {
-  /* Accessibility */
-  .sr-only {
-    @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
-  }
+/* Accessibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
-  /* Focus styles */
-  .focus-visible {
-    @apply outline-none ring-2 ring-cevs-accent ring-offset-2;
-  }
+/* Focus styles */
+.focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #2563eb, 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
 
-  /* Reduced motion */
-  @media (prefers-reduced-motion: reduce) {
-    .charger-finder * {
-      @apply transition-none;
-    }
+/* Animations */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .charger-finder * {
+    transition: none !important;
   }
 }

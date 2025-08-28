@@ -25,7 +25,7 @@
     "dev": "vite --config demo/vite.config.ts",
     "build": "tsup src/index.ts --dts --format esm,cjs --sourcemap",
     "postbuild": "node -e \"const fs=require('fs'); fs.copyFileSync('src/styles.css', 'dist/styles.css'); fs.copyFileSync('src/theme.css', 'dist/theme.css');\"",
-    "build:demo": "npm run build && cd demo && npm install && npm run build",
+    "build:demo": "npm run build && cd demo && npm install && npm run copy-api-key && npm run build",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "test": "vitest run",
@@ -34,7 +34,11 @@
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build",
     "type-check": "tsc --noEmit",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "validate": "npm run lint && npm run type-check && npm run test",
+    "prepublishOnly": "npm run validate && npm run build"
   },
   "keywords": [
     "ev",

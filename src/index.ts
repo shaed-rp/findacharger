@@ -30,6 +30,9 @@ export { getEnvConfig, isValidApiKey, maskApiKey } from './lib/env';
 // Utility exports
 export { FUEL_TYPES, CONNECTOR_TYPES } from './types/nrel';
 
+// Logging exports
+export { logger, Logger, LogLevel, logError, logWarn, logInfo, logDebug } from './lib/logger';
+
 // CSS exports (for manual import if needed)
 export const styles = './styles.css';
 export const theme = './theme.css';

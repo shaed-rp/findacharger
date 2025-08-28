@@ -94,7 +94,34 @@ Create a `.env` file with your NREL API key:
 NREL_API_KEY=your_nrel_api_key_here
 NREL_BASE_URL=https://developer.nrel.gov/api/alt-fuel-stations/v1/nearest.json
 NOMINATIM_BASE_URL=https://nominatim.openstreetmap.org/search
+LOG_ENDPOINT=https://your-logging-service.com/logs
 ```
+
+### Logging Configuration
+
+The library includes a centralized logging system with environment-aware configuration:
+
+```tsx
+import { logger, LogLevel } from '@commercialevs/charger-insights';
+
+// Configure logging
+logger.setConfig({
+  level: LogLevel.DEBUG, // ERROR, WARN, INFO, DEBUG
+  enableConsole: true,
+  enableRemote: true,
+  remoteEndpoint: process.env.LOG_ENDPOINT
+});
+
+// Use in components
+logger.info('Charger search initiated', { location: 'San Francisco' });
+logger.error('API request failed', { error: 'Network timeout' });
+```
+
+**Log Levels:**
+- **ERROR**: Critical errors that need immediate attention
+- **WARN**: Warning conditions that should be monitored
+- **INFO**: General information about application flow
+- **DEBUG**: Detailed debugging information (development only)
 
 ### API Key Setup
 
@@ -343,12 +370,17 @@ src/
 - **Zod** - Runtime type validation
 - **Vitest** - Fast unit testing
 - **Storybook** - Component documentation
+- **Centralized Logging** - Environment-aware logging with remote support
 
 ## 🤝 Contributing
 
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for detailed information.
+
+### Quick Start
+
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
@@ -359,6 +391,20 @@ src/
 - Update Storybook stories
 - Follow the existing code style
 - Add JSDoc comments for public APIs
+- Use conventional commit messages
+- Ensure all CI checks pass
+
+### Automated Workflows
+
+Our GitHub Actions provide comprehensive automation:
+
+- **CI/CD Pipeline**: Automated testing, linting, and building
+- **Security Scanning**: Dependency vulnerability checks
+- **Performance Testing**: Lighthouse performance analysis
+- **Accessibility Testing**: WCAG compliance verification
+- **Bundle Analysis**: Size monitoring and optimization
+- **Documentation Deployment**: Automatic Storybook deployment
+- **Dependency Updates**: Automated security patches via Dependabot
 
 ## 📄 License
 
@@ -430,5 +476,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 Built with ❤️ for the commercial EV industry
-#   U p d a t e d   2 0 2 5 - 0 8 - 2 7   1 5 : 4 2 : 0 3  
+#   U p d a t e d   2 0 2 5 - 0 8 - 2 7   1 5 : 4 2 : 0 3 
+ 
  

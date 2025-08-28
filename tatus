@@ -1,0 +1,10 @@
+[33mbabb9fb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m Fix QueryClient context issue by restructuring component
+[33m5253ed0[m Fix Vite base path and add debugging for white screen issue
+[33mb80715f[m Fix QueryClient conflict by removing duplicate QueryClientProvider from demo
+[33m7cddc70[m Fix CSS copy command for cross-platform compatibility using Node.js
+[33md89379a[m Fix CSS copy command for cross-platform compatibility (Linux/Windows)
+[33meaf2fa9[m Fix QueryClient issue by using built library instead of source imports
+[33mbc084e9[m Trigger new Vercel deployment with demo application configuration
+[33m8369049[m Fix Vercel deployment to serve demo application instead of library build
+[33me19c801[m Fix TypeScript compilation error for import.meta.env in build process
+[33m5b93fbf[m Fix TypeScript compilation errors for build process
