@@ -9,6 +9,8 @@ function DemoApp() {
   // Use the API key from the API.txt file
   const apiKey = 'm5yTajemu8TgV6U0j8QsDaDSr58DL2h7KXZXEMo2';
 
+  console.log('DemoApp rendering with API key:', apiKey);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto p-4">
@@ -22,22 +24,25 @@ function DemoApp() {
         </header>
 
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <ChargerFinder
-            apiKey={apiKey}
-            defaultFuelTypes={['ELEC']}
-            defaultRadius={25}
-            view="split"
-            theme="light"
-            onStationSelect={(station) => {
-              console.log('Selected station:', station);
-            }}
-            onSearch={(params) => {
-              console.log('Search params:', params);
-            }}
-            onError={(error) => {
-              console.error('Charger finder error:', error);
-            }}
-          />
+          <div style={{ padding: '20px', border: '2px solid red' }}>
+            <p>Debug: About to render ChargerFinder</p>
+            <ChargerFinder
+              apiKey={apiKey}
+              defaultFuelTypes={['ELEC']}
+              defaultRadius={25}
+              view="split"
+              theme="light"
+              onStationSelect={(station) => {
+                console.log('Selected station:', station);
+              }}
+              onSearch={(params) => {
+                console.log('Search params:', params);
+              }}
+              onError={(error) => {
+                console.error('Charger finder error:', error);
+              }}
+            />
+          </div>
         </div>
 
         <footer className="mt-8 text-center text-gray-500 text-sm">

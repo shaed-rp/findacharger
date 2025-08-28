@@ -9,7 +9,6 @@ export default defineConfig({
   external: [
     'react',
     'react-dom',
-    '@tanstack/react-query',
     'react-leaflet',
     'leaflet'
   ],

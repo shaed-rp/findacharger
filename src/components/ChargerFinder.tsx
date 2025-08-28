@@ -45,6 +45,7 @@ export function ChargerFinder({
   style,
   queryClient = defaultQueryClient,
 }: ChargerFinderProps & { queryClient?: QueryClient }) {
+  console.log('ChargerFinder rendering with props:', { apiKey, theme, view, defaultRadius });
   // State management
   const [currentLocation, setCurrentLocation] = useState(initialLocation);
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
@@ -195,14 +196,15 @@ export function ChargerFinder({
     return `cevs-theme-${theme}`;
   }, [theme]);
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      <div
-        className={clsx('charger-finder', themeClass, className)}
-        style={style}
-        role="region"
-        aria-label="Charging station finder"
-      >
+  try {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <div
+          className={clsx('charger-finder', themeClass, className)}
+          style={style}
+          role="region"
+          aria-label="Charging station finder"
+        >
         {/* Header */}
         <div className="charger-finder__header">
           <h2 className="charger-finder__title">Find EV Charging Stations</h2>
@@ -292,4 +294,14 @@ export function ChargerFinder({
       </div>
     </QueryClientProvider>
   );
+  } catch (error) {
+    console.error('Error rendering ChargerFinder:', error);
+    return (
+      <div className="charger-finder__error" style={{ padding: '20px', border: '2px solid red' }}>
+        <h3>Error rendering ChargerFinder</h3>
+        <p>{error instanceof Error ? error.message : 'Unknown error'}</p>
+        <pre>{error instanceof Error ? error.stack : String(error)}</pre>
+      </div>
+    );
+  }
 }
